@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Musikloud</string>
+    <string name="message_purchase_one">%s</string>
+    <string name="value_coin">%d Coin</string>
+</resources>

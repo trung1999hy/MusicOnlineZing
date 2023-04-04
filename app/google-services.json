@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "269507090437",
+    "project_id": "musikloud-5ebb7",
+    "storage_bucket": "musikloud-5ebb7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269507090437:android:fbb7b72c5d76098976646c",
+        "android_client_info": {
+          "package_name": "com.ivanhao.internal_muisic_eat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "269507090437-tcro1bu0j2pjpiior16umk4m9062cl55.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ivanhao.internal_muisic_eat",
+            "certificate_hash": "2a8ae83ab46b9af3b1f1dc919f3cbc403c211c18"
+          }
+        },
+        {
+          "client_id": "269507090437-hpmjero570hq1j6h74l3551frjgv52jm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmE1WxYOiG9yJfBIyYGN2jd4iRjtCL1aM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "269507090437-hpmjero570hq1j6h74l3551frjgv52jm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
