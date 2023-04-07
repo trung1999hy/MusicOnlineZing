@@ -50,7 +50,7 @@ class AudioAdapter(private val context: Context) : RecyclerView.Adapter<AudioAda
         fun setDisplayView(songDto: Song) {
             txtName.text = songDto.name
             txtTime.text = songDto.performer
-            Glide.with(itemView.context).load(songDto.thumbnail).into(imgThumb)
+            Glide.with(itemView.context).load(songDto.thumbnail).placeholder(R.drawable.music).into(imgThumb)
         }
     }
 

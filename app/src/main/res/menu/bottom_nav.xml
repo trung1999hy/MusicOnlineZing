@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/bxh"
+        android:title="Bảng xếp hạng"
+        android:icon="@drawable/trophy"/>
+    <item android:id="@+id/song"
+        android:title="Bài hát tải xuống"
+        android:icon="@drawable/music"
+        />
+
+</menu>

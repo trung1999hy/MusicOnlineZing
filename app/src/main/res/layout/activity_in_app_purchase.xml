@@ -10,7 +10,7 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/bg_blue"
+        app:srcCompat="@drawable/bg_blue"
         android:scaleType="centerCrop"/>
 
     <ImageView
@@ -18,7 +18,7 @@
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:padding="12dp"
-        android:src="@drawable/ic_back"
+        app:srcCompat="@drawable/ic_back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         />

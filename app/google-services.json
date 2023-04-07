@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:269507090437:android:fbb7b72c5d76098976646c",
         "android_client_info": {
-          "package_name": "com.ivanhao.internal_muisic_eat"
+          "package_name": "com.trungtv.mymuisc"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "269507090437-tcro1bu0j2pjpiior16umk4m9062cl55.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.ivanhao.internal_muisic_eat",
+            "package_name": "com.trungtv.mymuisc",
             "certificate_hash": "2a8ae83ab46b9af3b1f1dc919f3cbc403c211c18"
           }
         },

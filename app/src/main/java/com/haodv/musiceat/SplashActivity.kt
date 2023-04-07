@@ -7,7 +7,6 @@ import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.android.billingclient.api.*
-import com.haodv.musiceat.MainActivity
 
 class SplashActivity : AppCompatActivity() {
     var billingClient: BillingClient? = null

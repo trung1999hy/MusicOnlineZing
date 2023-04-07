@@ -1,5 +1,8 @@
 <resources>
-    <string name="app_name">Musikloud</string>
+    <string name="app_name">MusicPlayer</string>
     <string name="message_purchase_one">%s</string>
     <string name="value_coin">%d Coin</string>
+    <string name="post_notifi">1233</string>
+    <string name="channel_post_notifi">25563</string>
+    <string name="bxh">Bang xep hang</string>
 </resources>

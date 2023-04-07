@@ -1,37 +1,107 @@
 package com.haodv.musiceat
 
+import android.Manifest.permission
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.os.Build.VERSION
 import android.os.Bundle
-import android.widget.Button
+import android.os.Environment
+import android.provider.Settings
 import android.widget.FrameLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.haodv.musiceat.AudioAdapter.OnItemSelect
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.haodv.musiceat.MainApp.Companion.newInstance
-import com.haodv.musiceat.di.Api
-import com.haodv.musiceat.di.Network
-import com.haodv.musiceat.model.Music
-import com.haodv.musiceat.model.Song
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.haodv.musiceat.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity(), OnItemSelect {
-    private var listData: RecyclerView? = null
-    private var audioAdapter: AudioAdapter? = null
+class MainActivity : AppCompatActivity() {
     private var frameLayout: FrameLayout? = null
-    private var txtCoin: TextView? = null
-    private var listValue = ArrayList<Song>()
-    private var pos = 1
-    private var network: Network? = null
+     var txtCoin: TextView? = null
+
+    private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater, null, false)
+        setContentView(binding.root)
         initView()
         listener()
+
     }
+
+    fun requestPermission() {
+        if (VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                intent.addCategory("android.intent.category.DEFAULT")
+                intent.data =
+                    Uri.parse(String.format("package:%s", applicationContext.packageName))
+                startActivityForResult(intent, 2296)
+                ActivityCompat.requestPermissions(
+                    this@MainActivity,
+                    arrayOf(permission.ACCESS_MEDIA_LOCATION),
+                    2296
+                )
+            } catch (e: Exception) {
+                val intent = Intent()
+                intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+                startActivityForResult(intent, 2296)
+                ActivityCompat.requestPermissions(
+                    this@MainActivity,
+                    arrayOf(permission.ACCESS_MEDIA_LOCATION),
+                    2296
+                )
+            }
+        } else {
+            //below android 11
+            ActivityCompat.requestPermissions(
+                this@MainActivity,
+                arrayOf(
+                    permission.WRITE_EXTERNAL_STORAGE,
+                    permission.READ_EXTERNAL_STORAGE
+                ),
+                2296
+            )
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 2296) {
+            if (VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (Environment.isExternalStorageManager()) {
+                    // perform action when allow permission success
+                } else {
+                    Toast.makeText(this, "Allow permission for storage access!", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        }
+    }
+
+    private fun checkPermission(): Boolean {
+        return if (VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager() && ContextCompat.checkSelfPermission(
+                this@MainActivity,
+                permission.ACCESS_MEDIA_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            val result = ContextCompat.checkSelfPermission(
+                this@MainActivity,
+                permission.READ_EXTERNAL_STORAGE
+            )
+            val result1 = ContextCompat.checkSelfPermission(
+                this@MainActivity,
+                permission.WRITE_EXTERNAL_STORAGE
+            )
+            result == PackageManager.PERMISSION_GRANTED && result1 == PackageManager.PERMISSION_GRANTED
+
+        }
+    }
+
 
     private fun listener() {
         txtCoin!!.setOnClickListener {
@@ -44,67 +114,29 @@ class MainActivity : AppCompatActivity(), OnItemSelect {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        val coin =newInstance()?.preference?.getValueCoin()
-        txtCoin!!.text = String.format(resources.getString(R.string.value_coin), coin)
-    }
 
     private fun initView() {
-        listData = findViewById(R.id.listData)
+        if (!checkPermission()) {
+            requestPermission()
+        }
         frameLayout = findViewById(R.id.frameLayout)
         txtCoin = findViewById(R.id.txtCoin)
-        audioAdapter = AudioAdapter(this)
-        audioAdapter?.setOnItemSelect(this)
-        audio
-    }
-
-    private val audio: Unit
-        private get() {
-            network = Network()
-            network!!.retrofit().create(Api::class.java).bxhZing().enqueue(object : Callback<Music> {
-                override fun onResponse(call: Call<Music>, response: Response<Music>) {
-                    listValue = response.body()!!.data!!.song
-                    val layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
-                    listData!!.setHasFixedSize(true)
-                    listData!!.layoutManager = layoutManager
-                    listData!!.adapter = audioAdapter
-                    audioAdapter!!.setData(listValue)
-                }
-
-                override fun onFailure(call: Call<Music>, t: Throwable) {}
-            })
-
-        }
-
-    private fun openPlayController(songDto: Song) {
-        val manager = supportFragmentManager
-        val transaction = manager.beginTransaction()
-        transaction.setCustomAnimations(
-            R.anim.slide_in_bottom,
-            R.anim.slide_out_bottom,
-            R.anim.slide_in_top,
-            R.anim.slide_out_top
-        )
-        transaction.addToBackStack(null)
-        transaction.replace(R.id.frameLayout, AudioFragment.newInstance(listValue, pos)).commit()
-    }
-
-    override fun onItemSelect(pos: Int) {
-        if (newInstance()?.preference?.getValueCoin() == 0) {
-            startActivity(Intent(this@MainActivity, PurchaseInAppActivity::class.java))
-        } else {
-            val songDto = listValue[pos]
-            this.pos = pos
-            songDto.play = true
-            openPlayController(songDto)
-        }
+        binding.container.adapter = MainViewPager(supportFragmentManager)
+        binding.tablayou.setupWithViewPager(binding.container)
+        binding.tablayou.getTabAt(0)?.icon = getDrawable(R.drawable.img)
+        binding.tablayou.getTabAt(1)?.icon = getDrawable(R.drawable.music)
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-        val coin = newInstance()!!.preference!!.getValueCoin()
-        txtCoin!!.text = String.format(resources.getString(R.string.value_coin), coin)
+        if (supportFragmentManager.backStackEntryCount > 0)
+            supportFragmentManager.popBackStack()
+        else super.onBackPressed()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val coin = newInstance()?.preference?.getValueCoin()
+        txtCoin?.text = String.format(resources.getString(R.string.value_coin), coin)
     }
 
     companion object {

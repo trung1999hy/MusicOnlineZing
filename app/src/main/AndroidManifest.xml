@@ -6,29 +6,36 @@
     >
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="com.android.vending.BILLING" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 
     <application
-
         android:name=".MainApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:requestLegacyExternalStorage="true"
-        android:icon="@drawable/ic_app"
+        android:icon="@mipmap/ic_launcher_music"
         android:label="@string/app_name"
         android:usesCleartextTraffic="true"
-        android:roundIcon="@drawable/ic_app"
+        android:roundIcon="@mipmap/ic_launcher_music"
         android:supportsRtl="true"
         android:theme="@style/Theme.MusicEat"
         tools:targetApi="31"
         >
         <activity
             android:name=".SplashActivity"
-            android:exported="true"
-            >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -37,6 +44,9 @@
         </activity>
         <activity android:name=".MainActivity"/>
         <activity android:name=".PurchaseInAppActivity"/>
+        <service android:name=".service.MusicService"/>
+        <receiver android:name=".service.MusicReceiver"/>
     </application>
+
 
 </manifest>
