@@ -1,6 +1,7 @@
 package com.haodv.musiceat
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.app.DownloadManager
 import android.content.ComponentName
 import android.content.Context
@@ -28,11 +29,11 @@ import com.haodv.musiceat.model.Song
 import com.haodv.musiceat.service.MusicService
 import com.haodv.musiceat.utils.Utils
 
+
 class AudioFragment : Fragment(), View.OnClickListener {
     private var songDtoList: ArrayList<Song> = arrayListOf()
     private var songDto: Song? = null
     private var pos = 0
-    private var audioController: AudioController? = null
     private var imgBack: ImageView? = null
     private var imgNext: ImageView? = null
     private var imgPrevious: ImageView? = null
@@ -45,6 +46,7 @@ class AudioFragment : Fragment(), View.OnClickListener {
     private var isPlayLocal: Boolean = false
     private lateinit var musicService: MusicService
     private lateinit var binding: FragmentAufioBinding
+
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as MusicService.MyBinder
@@ -58,7 +60,7 @@ class AudioFragment : Fragment(), View.OnClickListener {
         }
     }
 
-    private val listenerDuration = object : com.haodv.musiceat.service.ListenerDuration{
+    private val listenerDuration = object : com.haodv.musiceat.service.ListenerDuration {
         override fun duration(duration: Int, timeEnd: Int) {
             view?.let {
                 this@AudioFragment.duration(duration, timeEnd)
@@ -66,15 +68,27 @@ class AudioFragment : Fragment(), View.OnClickListener {
         }
 
         override fun event(keyEvent: String?, songDto: Song?) {
-          view?.let {
-              this@AudioFragment. event(keyEvent, songDto)
-          }
+            view?.let {
+                this@AudioFragment.event(keyEvent, songDto)
+            }
         }
 
         override fun endCoin() {
 
         }
 
+        override fun unbind() {
+            this@AudioFragment.unbind()
+            view?.let {
+                controllerMedia()
+            }
+        }
+
+    }
+
+    fun unbind() {
+        if (isMyServiceRunning(MusicService::class.java))
+            context?.unbindService(connection)
     }
 
     override fun onCreateView(
@@ -93,6 +107,7 @@ class AudioFragment : Fragment(), View.OnClickListener {
 
 
     private fun initView(view: View) {
+        (activity as MainActivity)?.setVisibility(View.GONE)
         imgBack = view.findViewById(R.id.imgBack)
         imgNext = view.findViewById(R.id.imgNext)
         imgPrevious = view.findViewById(R.id.imgPrevious)
@@ -140,20 +155,55 @@ class AudioFragment : Fragment(), View.OnClickListener {
     }
 
     private fun isPlayPause() {
-        musicService.playPauseMedia()
-        controllerMedia()
+        if (!isMyServiceRunning(MusicService::class.java)) {
+            val intent = Intent(context, MusicService::class.java)
+            intent.putExtra("listSong", songDtoList)
+            intent.putExtra("position", pos)
+            context?.startService(intent)
+            context?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        } else {
+            musicService.playPauseMedia()
+            controllerMedia()
+        }
     }
 
     private fun eventPrevious() {
-        musicService.eventPrevious()
-        listener()
+        if (!isMyServiceRunning(MusicService::class.java)) {
+            val intent = Intent(context, MusicService::class.java)
+            intent.putExtra("listSong", songDtoList)
+            intent.putExtra("position", if (pos > 0) pos-- else songDtoList.size - 1)
+            context?.startService(intent)
+            context?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        } else {
+            musicService.eventPrevious()
+            listener()
+        }
+
     }
 
     private fun enventNext() {
-        musicService.eventNext()
-        listener()
+        if (!isMyServiceRunning(MusicService::class.java)) {
+            val intent = Intent(context, MusicService::class.java)
+            intent.putExtra("listSong", songDtoList)
+            intent.putExtra("position", if (pos < songDtoList.size) pos++ else 0)
+            context?.startService(intent)
+            context?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        } else {
+            musicService.eventNext()
+            listener()
+        }
     }
 
+    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager =
+            requireActivity()?.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
+    }
 
     private fun imgNextRandom() {
         musicService?.setNextRandom(MainApp.newInstance()?.preference?.getNextRandom() == true)
@@ -245,25 +295,24 @@ class AudioFragment : Fragment(), View.OnClickListener {
 
     }
 
-     fun duration(duration: Int, timeEnd: Int) {
+    fun duration(duration: Int, timeEnd: Int) {
         val time = duration * 100
         if (timeEnd != 0)
             sbTime?.progress = time / timeEnd
-         else sbTime?.progress = 0
+        else sbTime?.progress = 0
         txtTime?.text = Utils.millisecondsToTime((timeEnd).toLong());
         textTimeStart?.text = Utils.millisecondsToTime((duration).toLong())
     }
 
 
-     fun event(keyEvent: String?, songDto: Song?) {
+    fun event(keyEvent: String?, songDto: Song?) {
         when (keyEvent) {
             MainActivity.EVENT_NEXT, MainActivity.EVENT_PREVIOUS -> listener()
             MainActivity.EVENT_PLAY_PAUSE -> controllerMedia()
-
         }
     }
 
-     fun endCoin() {
+    fun endCoin() {
         Toast.makeText(activity, "Please purchase coin!", Toast.LENGTH_LONG).show()
         activity?.startActivity(Intent(activity, PurchaseInAppActivity::class.java))
     }

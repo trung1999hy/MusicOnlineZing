@@ -18,8 +18,6 @@ class AudioController(songDtoList: List<Song>, pos: Int ) {
     private var path: String
     private var nextRandom : Boolean = false
 
-
-
     init {
         this.songDtoList = songDtoList
         path = songDtoList[pos].path.toString()

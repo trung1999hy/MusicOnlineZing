@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.haodv.musiceat.AudioAdapter
 import com.haodv.musiceat.AudioFragment
+import com.haodv.musiceat.MainActivity
 import com.haodv.musiceat.R
 import com.haodv.musiceat.databinding.FragmentMusicDownloadBinding
 import com.haodv.musiceat.model.Song
@@ -34,6 +35,7 @@ class MusicDownloadFragment : Fragment(), AudioAdapter.OnItemSelect {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(this)[MusicDownloadViewModel::class.java]
+        (activity as MainActivity)?.setVisibility(View.VISIBLE)
         viewModel.getMp3Songs(requireContext())
         audioAdapter = AudioAdapter(requireContext())
         audioAdapter?.setOnItemSelect(this)

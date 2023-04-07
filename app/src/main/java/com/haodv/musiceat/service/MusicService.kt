@@ -36,7 +36,7 @@ class MusicService : Service() {
     private lateinit var path: String
     private var nextRandom: Boolean = false
     private var context: Context? = null
-    private lateinit var listSong: ArrayList<Song>
+    private var listSong: ArrayList<Song> = arrayListOf()
     private lateinit var mediaSessionCompat: MediaSessionCompat
     private lateinit var notificationCompat: NotificationCompat.Builder
     private lateinit var notificationManager: NotificationManager
@@ -50,9 +50,9 @@ class MusicService : Service() {
             listSong = intent?.extras?.get("listSong") as ArrayList<Song>
             position = intent?.extras?.get("position") as Int
             if (listSong.size > 0) {
-                path = listSong[position].path.toString()
+                path = listSong.getOrNull(position)?.path.toString()
                 openMedia()
-                createNotificationChannel(listSong[position])
+                listSong.getOrNull(position)?.let { createNotificationChannel(it) }
             }
 
         }
@@ -65,7 +65,8 @@ class MusicService : Service() {
         mediaSessionCompat = MediaSessionCompat(this, "tag")
         startForeground(notificationId, build(song, mediaSessionCompat).build())
     }
-    fun setListenDuration(listenerDuration: ListenerDuration){
+
+    fun setListenDuration(listenerDuration: ListenerDuration) {
         this.listenerDuration = listenerDuration
     }
 
@@ -87,9 +88,9 @@ class MusicService : Service() {
             .setSmallIcon(R.drawable.ic_music)
             .setSilent(true)
             .setSound(null)
-            .setContentText(listSong[position].performer)
-            .setContentTitle(listSong[position].name)
-        if (listSong[position].play) {
+            .setContentText(listSong.getOrNull(position)?.performer)
+            .setContentTitle(listSong.getOrNull(position)?.name)
+        if (listSong.getOrNull(position)?.play == true) {
             notificationCompat.addAction(
                 R.drawable.ic_skip_back,
                 "Previous",
@@ -122,7 +123,7 @@ class MusicService : Service() {
         notificationCompat.setContentText(listSong[position].performer)
             .setContentTitle(listSong[position].name)
         notificationCompat.apply {
-            if (listSong[position].play) {
+            if(listSong.getOrNull(position)?.play == true) {
                 notificationCompat.addAction(
                     R.drawable.ic_skip_back,
                     "Previous",
@@ -219,6 +220,8 @@ class MusicService : Service() {
 
             }
             ACTION_CLOSE -> {
+                playPauseMedia()
+                listenerDuration.unbind()
                 stopSelf()
             }
         }
@@ -265,7 +268,8 @@ class MusicService : Service() {
             mediaPlayer!!.setOnPreparedListener {
                 it.start()
                 listSong[position].play = true
-                createNotificationChannel(listSong.get(position))
+                listSong.getOrNull(position)?.let { it1 -> createNotificationChannel(it1) }
+                listenerDuration.event(MainActivity.EVENT_PLAY_PAUSE, listSong[position])
                 runnable?.let { it1 -> handler?.removeCallbacks(it1) }
                 runnable = object : Runnable {
                     override fun run() {
@@ -309,34 +313,34 @@ class MusicService : Service() {
         when (focusChange) {
             AudioManager.AUDIOFOCUS_GAIN -> {
                 mediaPlayer?.start()
-                listSong[position].play = true
+                listSong.getOrNull(position)?.play = true
                 listenerDuration!!.event(MainActivity.EVENT_PLAY_PAUSE, listSong.get(position))
                 createNotificationChannel(listSong.get(position))
             }
             AudioManager.AUDIOFOCUS_LOSS -> {
                 mediaPlayer?.pause()
-                listSong[position].play = false
+                listSong.getOrNull(position)?.play = false
                 listenerDuration!!.event(MainActivity.EVENT_PLAY_PAUSE, listSong.get(position))
-                createNotificationChannel(listSong.get(position))
+                listSong.getOrNull(position)?.let { createNotificationChannel(it) }
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                 mediaPlayer?.pause()
-                listSong[position].play = false
+                listSong.getOrNull(position)?.play = false
                 listenerDuration!!.event(MainActivity.EVENT_PLAY_PAUSE, listSong.get(position))
-                createNotificationChannel(listSong.get(position))
+                listSong.getOrNull(position)?.let { createNotificationChannel(it) }
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
                 mediaPlayer?.pause()
-                listSong[position].play = false
+                listSong.getOrNull(position)?.play = false
                 listenerDuration!!.event(MainActivity.EVENT_PLAY_PAUSE, listSong.get(position))
-                createNotificationChannel(listSong.get(position))
+                listSong.getOrNull(position)?.let { createNotificationChannel(it) }
 
             }
             AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE -> {
                 mediaPlayer?.start()
-                listSong[position].play = true
+                listSong.getOrNull(position)?.play = true
                 listenerDuration!!.event(MainActivity.EVENT_PLAY_PAUSE, listSong.get(position))
-                createNotificationChannel(listSong.get(position))
+                listSong.getOrNull(position)?.let { createNotificationChannel(it) }
 
             }
         }
@@ -347,37 +351,32 @@ class MusicService : Service() {
     }
 
     fun playPauseMedia() {
-        val songDto = listSong[position]
-        val isPlay = songDto.play
-        if (isPlay) {
-            if (mediaPlayer != null && mediaPlayer!!.isPlaying) mediaPlayer!!.pause()
-        } else {
-            if (mediaPlayer != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    MainApp.newInstance()?.getAudioManager()?.requestAudioFocus(
-                        AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                            .setAudioAttributes(
-                                AudioAttributes.Builder()
-                                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                                    .build()
-                            )
-                            .setAcceptsDelayedFocusGain(true)
-                            .setOnAudioFocusChangeListener(audioFocusChangeListener).build()
-                    )
-                } else {
-                    MainApp.newInstance()?.getAudioManager()?.requestAudioFocus(
-                        audioFocusChangeListener,
-                        AudioManager.STREAM_MUSIC,
-                        AudioManager.AUDIOFOCUS_GAIN
-                    )
+        if (listSong.size - 1 > position) {
+            val songDto = listSong[position]
+            val isPlay = songDto.play
+            if (isPlay) {
+                if (mediaPlayer != null && mediaPlayer!!.isPlaying) mediaPlayer!!.pause()
+            } else {
+                if (mediaPlayer != null) {
+                    val audioAttributes = AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+
+                    val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                        .setAudioAttributes(audioAttributes)
+                        .setOnAudioFocusChangeListener (audioFocusChangeListener)
+                        .build()
+
+                    val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                    audioManager.requestAudioFocus(focusRequest)
+                    mediaPlayer?.start()
                 }
-                mediaPlayer?.start()
             }
+            listSong[position].play = !isPlay
+            listenerDuration!!.event(MainActivity.EVENT_PLAY_PAUSE, listSong.get(position))
+            listSong.getOrNull(position)?.let { createNotificationChannel(it) }
         }
-        listSong[position].play = !isPlay
-        listenerDuration!!.event(MainActivity.EVENT_PLAY_PAUSE, listSong.get(position))
-        createNotificationChannel(listSong[position])
     }
 
     fun eventNext() {
@@ -390,8 +389,7 @@ class MusicService : Service() {
             path = listSong[position].path.toString()
             openMedia()
             listenerDuration!!.event(MainActivity.EVENT_NEXT, listSong.get(position))
-            createNotificationChannel(listSong.get(position))
-
+            listSong.getOrNull(position)?.let { createNotificationChannel(it) }
         } catch (ex: Exception) {
         }
     }
@@ -410,8 +408,7 @@ class MusicService : Service() {
             path = listSong.get(position).path.toString()
             openMedia()
             listenerDuration!!.event(MainActivity.EVENT_PREVIOUS, listSong.get(position))
-            changeNotification()
-            createNotificationChannel(listSong.get(position))
+            listSong.getOrNull(position)?.let { createNotificationChannel(it) }
         } catch (ex: Exception) {
         }
     }
@@ -453,8 +450,11 @@ class MusicService : Service() {
     }
 
 }
+
 interface ListenerDuration {
     fun duration(duration: Int, timeEnd: Int)
     fun event(keyEvent: String?, songDto: Song?)
     fun endCoin()
+
+    fun unbind()
 }

@@ -45,6 +45,7 @@ class BxhFragment : Fragment(), AudioAdapter.OnItemSelect {
 
 
     private fun initView() {
+        (activity as MainActivity)?.setVisibility(View.VISIBLE)
         audioAdapter = AudioAdapter(requireContext())
         audioAdapter?.setOnItemSelect(this)
         audio
@@ -98,6 +99,7 @@ class BxhFragment : Fragment(), AudioAdapter.OnItemSelect {
         )
         transaction.add(R.id.frameLayout, AudioFragment.newInstance(listValue, pos))
             .addToBackStack(AudioFragment::class.java.name).commit()
+
     }
 
 }

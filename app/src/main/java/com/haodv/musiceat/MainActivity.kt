@@ -9,6 +9,7 @@ import android.os.Build.VERSION
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -30,6 +31,9 @@ class MainActivity : AppCompatActivity() {
         initView()
         listener()
 
+    }
+    fun setVisibility(visibility: Int){
+        binding.view.visibility = visibility
     }
 
     fun requestPermission() {
@@ -128,9 +132,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (supportFragmentManager.backStackEntryCount > 0)
+        if (supportFragmentManager.backStackEntryCount > 0){
+          setVisibility(View.VISIBLE)
             supportFragmentManager.popBackStack()
-        else super.onBackPressed()
+        }
+
+
+        else {
+            super.onBackPressed()
+
+        }
     }
 
     override fun onStart() {
