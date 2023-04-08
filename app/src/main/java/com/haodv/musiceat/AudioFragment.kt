@@ -1,7 +1,6 @@
 package com.haodv.musiceat
 
 import android.annotation.SuppressLint
-import android.app.ActivityManager
 import android.app.DownloadManager
 import android.content.ComponentName
 import android.content.Context
@@ -11,7 +10,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.IBinder
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +26,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.haodv.musiceat.databinding.FragmentAufioBinding
 import com.haodv.musiceat.model.Song
+import com.haodv.musiceat.service.ListenerDuration
 import com.haodv.musiceat.service.MusicService
 import com.haodv.musiceat.utils.Utils
 
@@ -53,9 +52,9 @@ class AudioFragment : Fragment(), View.OnClickListener {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as MusicService.MyBinder
             musicService = binder.getService()
+            musicService.isBinder = true
             musicService.setListenDuration(listenerDuration)
             listener()
-
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -63,7 +62,7 @@ class AudioFragment : Fragment(), View.OnClickListener {
         }
     }
 
-    private val listenerDuration = object : com.haodv.musiceat.service.ListenerDuration {
+    private val listenerDuration = object : ListenerDuration {
         override fun duration(duration: Int, timeEnd: Int) {
             view?.let {
                 this@AudioFragment.duration(duration, timeEnd)
@@ -80,19 +79,18 @@ class AudioFragment : Fragment(), View.OnClickListener {
 
         }
 
-        override fun unbind() {
-            this@AudioFragment.unbind()
-            view?.let {
-                controllerMedia()
-            }
+        override fun unbind(isBinder: Boolean) {
+            if (MainApp.newInstance()?.isMyServiceRunning(MusicService::class.java) == true)
+                if (isBinder) {
+                    unBind()
+                }
         }
-
     }
 
-    fun unbind() {
-        if (isMyServiceRunning(MusicService::class.java))
-            context?.unbindService(connection)
+    fun unBind() {
+        context?.unbindService(connection)
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -108,6 +106,22 @@ class AudioFragment : Fragment(), View.OnClickListener {
         initView(view)
     }
 
+
+    override fun onDestroyView() {
+        musicService.isBinder = false
+        super.onDestroyView()
+        context?.unbindService(connection)
+
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (MainApp.newInstance()?.isMyServiceRunning(MusicService::class.java) == true) {
+            val intent = Intent(context, MusicService::class.java)
+            context?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        }
+    }
 
     private fun initView(view: View) {
         (activity as MainActivity)?.setVisibility(View.GONE)
@@ -125,12 +139,7 @@ class AudioFragment : Fragment(), View.OnClickListener {
         imgPrevious?.setOnClickListener(this)
         imgPlayPause?.setOnClickListener(this)
         binding.imgLoop.setOnClickListener(this)
-        val intent = Intent(context, MusicService::class.java)
-        intent.putExtra("listSong", songDtoList)
-        intent.putExtra("position", pos)
-        context?.startService(intent)
-        progessbarListenr()
-        context?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        startServiceMusic(songDtoList, pos)
         if (MainApp.newInstance()?.preference?.getNextRandom() == true)
             binding.imgLoop.setImageDrawable(context?.getDrawable(R.drawable.ic_lap_enable))
         else
@@ -150,7 +159,7 @@ class AudioFragment : Fragment(), View.OnClickListener {
 
     override fun onClick(v: View) {
         when (v.id) {
-            R.id.imgBack -> if (activity?.supportFragmentManager?.backStackEntryCount!! > 0) activity?.supportFragmentManager?.popBackStack() else activity?.onBackPressed()
+            R.id.imgBack -> (activity as MainActivity).onBackPressed()
             R.id.imgNext -> enventNext()
             R.id.imgPrevious -> eventPrevious()
             R.id.imgPlayPause -> isPlayPause()
@@ -158,26 +167,25 @@ class AudioFragment : Fragment(), View.OnClickListener {
         }
     }
 
+    fun startServiceMusic(songDtoList: ArrayList<Song>, pos: Int) {
+        val intent = Intent(context, MusicService::class.java)
+        intent.putExtra("listSong", songDtoList)
+        intent.putExtra("position", pos)
+        context?.startService(intent)
+        context?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+    }
+
     private fun isPlayPause() {
-        if (!isMyServiceRunning(MusicService::class.java)) {
-            val intent = Intent(context, MusicService::class.java)
-            intent.putExtra("listSong", songDtoList)
-            intent.putExtra("position", pos)
-            context?.startService(intent)
-            context?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        if (MainApp.newInstance()?.isMyServiceRunning(MusicService::class.java) == false) {
+            startServiceMusic(songDtoList, pos)
         } else {
             musicService.playPauseMedia()
-            controllerMedia()
         }
     }
 
     private fun eventPrevious() {
-        if (!isMyServiceRunning(MusicService::class.java)) {
-            val intent = Intent(context, MusicService::class.java)
-            intent.putExtra("listSong", songDtoList)
-            intent.putExtra("position", if (pos > 0) pos-- else songDtoList.size - 1)
-            context?.startService(intent)
-            context?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        if (MainApp.newInstance()?.isMyServiceRunning(MusicService::class.java) == false) {
+            startServiceMusic(songDtoList, if (pos > 0) pos-- else songDtoList.size - 1)
         } else {
             musicService.eventPrevious()
             listener()
@@ -186,28 +194,14 @@ class AudioFragment : Fragment(), View.OnClickListener {
     }
 
     private fun enventNext() {
-        if (!isMyServiceRunning(MusicService::class.java)) {
-            val intent = Intent(context, MusicService::class.java)
-            intent.putExtra("listSong", songDtoList)
-            intent.putExtra("position", if (pos < songDtoList.size) pos++ else 0)
-            context?.startService(intent)
-            context?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        if (MainApp.newInstance()?.isMyServiceRunning(MusicService::class.java) == false) {
+            startServiceMusic(songDtoList, if (pos < songDtoList.size) pos++ else 0)
         } else {
             musicService.eventNext()
             listener()
         }
     }
 
-    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
-        val manager =
-            requireActivity()?.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-            if (serviceClass.name == service.service.className) {
-                return true
-            }
-        }
-        return false
-    }
 
     private fun imgNextRandom() {
         musicService?.setNextRandom(MainApp.newInstance()?.preference?.getNextRandom() == true)
@@ -283,10 +277,6 @@ class AudioFragment : Fragment(), View.OnClickListener {
     }
 
 
-    private fun updateView(songDto: Song) {
-        txtName!!.text = songDto.name
-    }
-
     private fun controllerMedia() {
         val isPlay = musicService.getSong()?.play ?: false
         if (isPlay) {
@@ -295,6 +285,7 @@ class AudioFragment : Fragment(), View.OnClickListener {
         } else {
             imgPlayPause!!.setImageDrawable(activity?.resources?.getDrawable(R.drawable.ic_play))
             lottieAnimationView!!.pauseAnimation()
+
         }
     }
 
@@ -326,7 +317,13 @@ class AudioFragment : Fragment(), View.OnClickListener {
         when (keyEvent) {
             MainActivity.EVENT_NEXT, MainActivity.EVENT_PREVIOUS -> listener()
             MainActivity.EVENT_PLAY_PAUSE -> controllerMedia()
+            MainActivity.EVENT_CLOSE -> cloes()
         }
+    }
+
+    private fun cloes() {
+        imgPlayPause!!.setImageDrawable(activity?.resources?.getDrawable(R.drawable.ic_play))
+        lottieAnimationView!!.pauseAnimation()
     }
 
     fun endCoin() {

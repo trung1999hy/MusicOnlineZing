@@ -15,11 +15,9 @@ import android.os.*
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.haodv.musiceat.MainActivity
-import com.haodv.musiceat.MainApp
 import com.haodv.musiceat.R
 import com.haodv.musiceat.model.Song
 import kotlin.random.Random
@@ -28,7 +26,7 @@ import kotlin.random.Random
 class MusicService : Service() {
     private var position = 1
     private var mediaPlayer: MediaPlayer? = null
-    private var handler: Handler? = Handler()
+    private var handler: Handler? = Handler(Looper.getMainLooper())
     private var runnable: Runnable? = null
     private var duration = 0
     private val CHANNEL_ID = "Music"
@@ -43,6 +41,7 @@ class MusicService : Service() {
     private lateinit var notificationManager: NotificationManager
     private val binder = MyBinder()
     private var listenerDuration: ListenerDuration? = null
+    var isBinder : Boolean = false
 
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -119,7 +118,6 @@ class MusicService : Service() {
                     .setShowActionsInCompactView(0, 1, 2)
                     .setMediaSession(mediaSessionCompat.sessionToken)
             )
-
         song.thumbnail?.let { setImage(it) }
         return notificationCompat
     }
@@ -165,13 +163,10 @@ class MusicService : Service() {
             ACTION_NEXT -> {
                 eventNext()
                 sendActionActivity(ACTION_NEXT)
-
-
             }
             ACTION_CLOSE -> {
-                if (listSong.getOrNull(position)?.play == true)
-                    playPauseMedia()
-                listenerDuration?.unbind()
+                listenerDuration?.event(MainActivity.EVENT_CLOSE, listSong.getOrNull(position))
+                listenerDuration?.unbind(isBinder)
                 stopSelf()
             }
         }
@@ -183,13 +178,13 @@ class MusicService : Service() {
 
 
     fun sendActionActivity(action: Int) {
-        val intent = Intent("send_data_to_activity")
-        val bundle = Bundle()
-        bundle.putSerializable("song", listSong[position])
-        bundle.putBoolean("status", mediaPlayer?.isPlaying == true)
-        bundle.putInt("action", action)
-        intent.putExtras(bundle)
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+//        val intent = Intent("send_data_to_activity")
+//        val bundle = Bundle()
+//        bundle.putSerializable("song", listSong[position])
+//        bundle.putBoolean("status", mediaPlayer?.isPlaying == true)
+//        bundle.putInt("action", action)
+//        intent.putExtras(bundle)
+//        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
     }
 
 
@@ -227,26 +222,8 @@ class MusicService : Service() {
                             duration = mediaPlayer!!.currentPosition
                             if (mediaPlayer?.duration ?: 0 > 0) {
                                 if (duration < mediaPlayer!!.duration) {
-
-                                    notificationCompat.setProgress(
-                                        100,
-                                        (duration / mediaPlayer!!.duration * 100).toInt(),
-                                        false
-                                    )
+                                    handler!!.postDelayed(this, 1000)
                                     listenerDuration?.duration(duration, mediaPlayer!!.duration)
-                                    mediaSessionCompat.setMetadata(
-                                        MediaMetadataCompat.Builder()
-                                            .putLong(
-                                                MediaMetadataCompat.METADATA_KEY_DURATION,
-                                                mediaPlayer?.duration?.toLong() ?: 0L
-                                            )
-                                            .build()
-                                    )
-                                    notificationManager.notify(
-                                        notificationId,
-                                        notificationCompat.build()
-                                    )
-                                    handler!!.postDelayed(this, 500)
                                 } else handler?.postDelayed({ eventNext() }, 1000)
                             } else {
                                 notificationCompat.setProgress(100, 0, false)
@@ -300,7 +277,6 @@ class MusicService : Service() {
                 listSong.getOrNull(position)?.play = true
                 listenerDuration?.event(MainActivity.EVENT_PLAY_PAUSE, listSong.getOrNull(position))
                 listSong.getOrNull(position)?.let { createNotificationChannel(it) }
-
             }
         }
     }
@@ -416,5 +392,5 @@ interface ListenerDuration {
     fun event(keyEvent: String?, songDto: Song?)
     fun endCoin()
 
-    fun unbind()
+    fun unbind(isBinder: Boolean)
 }

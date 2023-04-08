@@ -136,11 +136,8 @@ class MainActivity : AppCompatActivity() {
           setVisibility(View.VISIBLE)
             supportFragmentManager.popBackStack()
         }
-
-
         else {
             super.onBackPressed()
-
         }
     }
 
@@ -156,5 +153,6 @@ class MainActivity : AppCompatActivity() {
         const val EVENT_NEXT = "EVENT_NEXT"
         const val EVENT_PREVIOUS = "EVENT_PREVIOUS"
         const val EVENT_PLAY_PAUSE = "EVENT_PLAY_PAUSE"
+        const val EVENT_CLOSE = "EVENT_COLES"
     }
 }
