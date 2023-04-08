@@ -12,6 +12,7 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.*
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -41,7 +42,7 @@ class MusicService : Service() {
     private lateinit var notificationCompat: NotificationCompat.Builder
     private lateinit var notificationManager: NotificationManager
     private val binder = MyBinder()
-    private lateinit var listenerDuration: ListenerDuration
+    private var listenerDuration: ListenerDuration? = null
 
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -80,16 +81,20 @@ class MusicService : Service() {
             }
             // Register the channel with the system
             notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
 
         }
         notificationCompat = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_music)
-            .setSilent(true)
-            .setSound(null)
             .setContentText(listSong.getOrNull(position)?.performer)
             .setContentTitle(listSong.getOrNull(position)?.name)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setSilent(true)
+            .setSound(null)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
         if (listSong.getOrNull(position)?.play == true) {
             notificationCompat.addAction(
                 R.drawable.ic_skip_back,
@@ -119,64 +124,8 @@ class MusicService : Service() {
         return notificationCompat
     }
 
-    fun changeNotification() {
-        notificationCompat.setContentText(listSong[position].performer)
-            .setContentTitle(listSong[position].name)
-        notificationCompat.apply {
-            if(listSong.getOrNull(position)?.play == true) {
-                notificationCompat.addAction(
-                    R.drawable.ic_skip_back,
-                    "Previous",
-                    pendingIntent(this@MusicService, ACTION_PREVIOUS)
-                )
-                addAction(
-                    R.drawable.ic_pause,
-                    "Pause",
-                    pendingIntent(this@MusicService, ACTION_RESUM)
-                )
-                addAction(
-                    R.drawable.ic_skip_forward,
-                    "Next",
-                    pendingIntent(this@MusicService, ACTION_NEXT)
-                )
-                addAction(
-                    R.drawable.ic_x_black,
-                    "Close",
-                    pendingIntent(this@MusicService, ACTION_CLOSE)
-                )
-            } else {
-                addAction(
-                    R.drawable.ic_skip_back,
-                    "Previous",
-                    pendingIntent(this@MusicService, ACTION_PREVIOUS)
-                )
-                addAction(
-                    R.drawable.ic_play,
-                    "Play",
-                    pendingIntent(this@MusicService, ACTION_PLAY)
-                )
-                addAction(
-                    R.drawable.ic_skip_forward,
-                    "Next",
-                    pendingIntent(this@MusicService, ACTION_NEXT)
-                )
-                addAction(
-                    R.drawable.ic_x_black,
-                    "Close",
-                    pendingIntent(this@MusicService, ACTION_CLOSE)
-                )
-            }
-        }.setStyle(
-            androidx.media.app.NotificationCompat.MediaStyle()
-                .setShowActionsInCompactView(0, 1, 2)
-                .setMediaSession(mediaSessionCompat.sessionToken)
-        )
-            .setStyle(
-                androidx.media.app.NotificationCompat.MediaStyle()
-                    .setShowActionsInCompactView(1, 2, 3)
-                    .setMediaSession(mediaSessionCompat.sessionToken)
-            )
-        createNotificationChannel(listSong[position])
+    fun seekTo(time: Long) {
+
     }
 
     fun setImage(url: String) {
@@ -220,8 +169,9 @@ class MusicService : Service() {
 
             }
             ACTION_CLOSE -> {
-                playPauseMedia()
-                listenerDuration.unbind()
+                if (listSong.getOrNull(position)?.play == true)
+                    playPauseMedia()
+                listenerDuration?.unbind()
                 stopSelf()
             }
         }
@@ -269,7 +219,7 @@ class MusicService : Service() {
                 it.start()
                 listSong[position].play = true
                 listSong.getOrNull(position)?.let { it1 -> createNotificationChannel(it1) }
-                listenerDuration.event(MainActivity.EVENT_PLAY_PAUSE, listSong[position])
+                listenerDuration?.event(MainActivity.EVENT_PLAY_PAUSE, listSong[position])
                 runnable?.let { it1 -> handler?.removeCallbacks(it1) }
                 runnable = object : Runnable {
                     override fun run() {
@@ -277,17 +227,26 @@ class MusicService : Service() {
                             duration = mediaPlayer!!.currentPosition
                             if (mediaPlayer?.duration ?: 0 > 0) {
                                 if (duration < mediaPlayer!!.duration) {
-                                    handler!!.postDelayed(this, 500)
+
                                     notificationCompat.setProgress(
                                         100,
-                                        duration / mediaPlayer!!.duration * 100,
+                                        (duration / mediaPlayer!!.duration * 100).toInt(),
                                         false
                                     )
                                     listenerDuration?.duration(duration, mediaPlayer!!.duration)
+                                    mediaSessionCompat.setMetadata(
+                                        MediaMetadataCompat.Builder()
+                                            .putLong(
+                                                MediaMetadataCompat.METADATA_KEY_DURATION,
+                                                mediaPlayer?.duration?.toLong() ?: 0L
+                                            )
+                                            .build()
+                                    )
                                     notificationManager.notify(
                                         notificationId,
                                         notificationCompat.build()
                                     )
+                                    handler!!.postDelayed(this, 500)
                                 } else handler?.postDelayed({ eventNext() }, 1000)
                             } else {
                                 notificationCompat.setProgress(100, 0, false)
@@ -314,32 +273,32 @@ class MusicService : Service() {
             AudioManager.AUDIOFOCUS_GAIN -> {
                 mediaPlayer?.start()
                 listSong.getOrNull(position)?.play = true
-                listenerDuration!!.event(MainActivity.EVENT_PLAY_PAUSE, listSong.get(position))
-                createNotificationChannel(listSong.get(position))
+                listenerDuration?.event(MainActivity.EVENT_PLAY_PAUSE, listSong.getOrNull(position))
+                listSong.getOrNull(position)?.let { createNotificationChannel(it) }
             }
             AudioManager.AUDIOFOCUS_LOSS -> {
                 mediaPlayer?.pause()
                 listSong.getOrNull(position)?.play = false
-                listenerDuration!!.event(MainActivity.EVENT_PLAY_PAUSE, listSong.get(position))
+                listenerDuration?.event(MainActivity.EVENT_PLAY_PAUSE, listSong.getOrNull(position))
                 listSong.getOrNull(position)?.let { createNotificationChannel(it) }
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                 mediaPlayer?.pause()
                 listSong.getOrNull(position)?.play = false
-                listenerDuration!!.event(MainActivity.EVENT_PLAY_PAUSE, listSong.get(position))
+                listenerDuration?.event(MainActivity.EVENT_PLAY_PAUSE, listSong.getOrNull(position))
                 listSong.getOrNull(position)?.let { createNotificationChannel(it) }
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
                 mediaPlayer?.pause()
                 listSong.getOrNull(position)?.play = false
-                listenerDuration!!.event(MainActivity.EVENT_PLAY_PAUSE, listSong.get(position))
+                listenerDuration?.event(MainActivity.EVENT_PLAY_PAUSE, listSong.getOrNull(position))
                 listSong.getOrNull(position)?.let { createNotificationChannel(it) }
 
             }
             AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE -> {
                 mediaPlayer?.start()
                 listSong.getOrNull(position)?.play = true
-                listenerDuration!!.event(MainActivity.EVENT_PLAY_PAUSE, listSong.get(position))
+                listenerDuration?.event(MainActivity.EVENT_PLAY_PAUSE, listSong.getOrNull(position))
                 listSong.getOrNull(position)?.let { createNotificationChannel(it) }
 
             }
@@ -365,7 +324,7 @@ class MusicService : Service() {
 
                     val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
                         .setAudioAttributes(audioAttributes)
-                        .setOnAudioFocusChangeListener (audioFocusChangeListener)
+                        .setOnAudioFocusChangeListener(audioFocusChangeListener)
                         .build()
 
                     val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -374,7 +333,7 @@ class MusicService : Service() {
                 }
             }
             listSong[position].play = !isPlay
-            listenerDuration!!.event(MainActivity.EVENT_PLAY_PAUSE, listSong.get(position))
+            listenerDuration?.event(MainActivity.EVENT_PLAY_PAUSE, listSong.getOrNull(position))
             listSong.getOrNull(position)?.let { createNotificationChannel(it) }
         }
     }
@@ -386,15 +345,15 @@ class MusicService : Service() {
             if (nextRandom) {
                 position = Random.nextInt(0, posMax)
             } else position++
-            path = listSong[position].path.toString()
+            path = listSong.getOrNull(position)?.path.toString()
             openMedia()
-            listenerDuration!!.event(MainActivity.EVENT_NEXT, listSong.get(position))
+            listenerDuration!!.event(MainActivity.EVENT_NEXT, listSong.getOrNull(position))
             listSong.getOrNull(position)?.let { createNotificationChannel(it) }
         } catch (ex: Exception) {
         }
     }
 
-    fun getSong(): Song = listSong[position]
+    fun getSong(): Song? = listSong.getOrNull(position)
 
     fun setNextRandom(nextRandom: Boolean) {
         this.nextRandom = nextRandom
@@ -405,9 +364,9 @@ class MusicService : Service() {
             if (position <= 0) return
             mediaPlayer?.reset();
             position--
-            path = listSong.get(position).path.toString()
+            path = listSong.getOrNull(position)?.path.toString()
             openMedia()
-            listenerDuration!!.event(MainActivity.EVENT_PREVIOUS, listSong.get(position))
+            listenerDuration?.event(MainActivity.EVENT_PREVIOUS, listSong.getOrNull(position))
             listSong.getOrNull(position)?.let { createNotificationChannel(it) }
         } catch (ex: Exception) {
         }
@@ -438,6 +397,7 @@ class MusicService : Service() {
         mediaPlayer?.release()
         mediaPlayer = null
         listSong = arrayListOf()
+        runnable?.let { handler?.removeCallbacks(it) }
         stopForeground(notificationId)
     }
 

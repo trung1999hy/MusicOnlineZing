@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.IBinder
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +20,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -51,8 +53,9 @@ class AudioFragment : Fragment(), View.OnClickListener {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as MusicService.MyBinder
             musicService = binder.getService()
-            listener()
             musicService.setListenDuration(listenerDuration)
+            listener()
+
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -126,6 +129,7 @@ class AudioFragment : Fragment(), View.OnClickListener {
         intent.putExtra("listSong", songDtoList)
         intent.putExtra("position", pos)
         context?.startService(intent)
+        progessbarListenr()
         context?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
         if (MainApp.newInstance()?.preference?.getNextRandom() == true)
             binding.imgLoop.setImageDrawable(context?.getDrawable(R.drawable.ic_lap_enable))
@@ -140,7 +144,7 @@ class AudioFragment : Fragment(), View.OnClickListener {
 
     private fun listener() {
         txtName!!.text =
-            "Bạn đang nghe bài hát hát " + musicService.getSong().name + " do ca sĩ " + musicService.getSong().performer + " thể hiện"
+            "Bạn đang nghe bài hát hát " + musicService.getSong()?.name + " do ca sĩ " + musicService.getSong()?.performer + " thể hiện"
         txtName?.isSelected = true
     }
 
@@ -284,7 +288,7 @@ class AudioFragment : Fragment(), View.OnClickListener {
     }
 
     private fun controllerMedia() {
-        val isPlay = musicService.getSong().play
+        val isPlay = musicService.getSong()?.play ?: false
         if (isPlay) {
             imgPlayPause!!.setImageDrawable(activity?.resources?.getDrawable(R.drawable.ic_pause))
             lottieAnimationView!!.playAnimation()
@@ -292,7 +296,20 @@ class AudioFragment : Fragment(), View.OnClickListener {
             imgPlayPause!!.setImageDrawable(activity?.resources?.getDrawable(R.drawable.ic_play))
             lottieAnimationView!!.pauseAnimation()
         }
+    }
 
+    fun progessbarListenr() {
+        sbTime?.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
+            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+
+            }
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {
+            }
+        })
     }
 
     fun duration(duration: Int, timeEnd: Int) {
