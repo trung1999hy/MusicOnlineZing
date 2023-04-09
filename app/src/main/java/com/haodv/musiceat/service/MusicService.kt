@@ -12,7 +12,6 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.*
-import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationCompat
 import com.bumptech.glide.Glide
@@ -54,7 +53,6 @@ class MusicService : Service() {
                 openMedia()
                 listSong.getOrNull(position)?.let { createNotificationChannel(it) }
             }
-
         }
         handleActionMusic(actionMusicReceiver)
 
@@ -71,6 +69,10 @@ class MusicService : Service() {
     }
 
     fun build(song: Song, mediaSessionCompat: MediaSessionCompat): NotificationCompat.Builder {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE )
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = getString(R.string.post_notifi)
             val descriptionText = getString(R.string.channel_post_notifi)
@@ -94,6 +96,7 @@ class MusicService : Service() {
             .setSound(null)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .setContentIntent(pendingIntent)
         if (listSong.getOrNull(position)?.play == true) {
             notificationCompat.addAction(
                 R.drawable.ic_skip_back,
@@ -121,6 +124,7 @@ class MusicService : Service() {
         song.thumbnail?.let { setImage(it) }
         return notificationCompat
     }
+
 
     fun seekTo(time: Long) {
 
