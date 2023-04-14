@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/frameLayout"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -55,20 +55,20 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
             android:padding="4dp"
-            app:srcCompat="@drawable/ic_coin"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_coin" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tablayou"
             android:layout_width="0dp"
             android:layout_height="?actionBarSize"
             android:layout_marginTop="16dp"
-            app:tabMode="fixed"
             android:background="#03FFFFFF"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView" />
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            app:tabMode="fixed" />
 
 
         <androidx.viewpager.widget.ViewPager

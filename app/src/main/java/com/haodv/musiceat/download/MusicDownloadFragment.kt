@@ -6,10 +6,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.haodv.musiceat.AudioAdapter
-import com.haodv.musiceat.AudioFragment
-import com.haodv.musiceat.MainActivity
-import com.haodv.musiceat.R
+import androidx.fragment.app.activityViewModels
+import com.haodv.musiceat.*
 import com.haodv.musiceat.databinding.FragmentMusicDownloadBinding
 import com.haodv.musiceat.model.Song
 
@@ -22,7 +20,7 @@ class MusicDownloadFragment : Fragment(), AudioAdapter.OnItemSelect {
     private var audioAdapter: AudioAdapter? = null
     private var pos = 0
 
-    private lateinit var viewModel: MusicDownloadViewModel
+    private  val viewModel: MainViewModel by activityViewModels()
     private lateinit var binding: FragmentMusicDownloadBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,15 +32,13 @@ class MusicDownloadFragment : Fragment(), AudioAdapter.OnItemSelect {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this)[MusicDownloadViewModel::class.java]
         (activity as MainActivity)?.setVisibility(View.VISIBLE)
-        viewModel.getMp3Songs(requireContext())
+        viewModel.getMp3Songs()
         audioAdapter = AudioAdapter(requireContext())
         audioAdapter?.setOnItemSelect(this)
         binding.rvData.adapter = audioAdapter
-        viewModel.lisMusicLocal.observe(viewLifecycleOwner) {
-            if (it.isNotEmpty())
-                audioAdapter?.setData(it.reversed() as ArrayList<Song>)
+        viewModel.lisMusicLocal.observe(viewLifecycleOwner) {songList ->
+            audioAdapter?.setData(songList.filter { it.like } as ArrayList<Song>)
         }
 
 
@@ -54,6 +50,14 @@ class MusicDownloadFragment : Fragment(), AudioAdapter.OnItemSelect {
         songDto?.play = true
         songDto?.let { openPlayController(it) }
 
+    }
+
+    override fun onItemLike(pos: Int, songDto: Song) {
+        songDto.apply {
+            this.like = !like
+        }
+        viewModel.upDateSong(pos, songDto)
+        audioAdapter?.notifyItemChanged(pos)
     }
 
     private fun openPlayController(songDto: Song) {
@@ -68,7 +72,7 @@ class MusicDownloadFragment : Fragment(), AudioAdapter.OnItemSelect {
         transaction.add(
             R.id.frameLayout,
             AudioFragment.newInstance(
-                viewModel.lisMusicLocal.value?.reversed() as ArrayList<Song>,
+                viewModel.lisMusicLocal.value?.filter { it.like } as ArrayList<Song>,
                 pos,
             )
         )

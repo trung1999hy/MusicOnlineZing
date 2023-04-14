@@ -30,6 +30,7 @@ class AudioAdapter(private val context: Context) : RecyclerView.Adapter<AudioAda
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.setDisplayView(listData[position])
         holder.itemView.setOnClickListener { v: View? -> onItemSelect?.onItemSelect(position) }
+        holder.imgLike.setOnClickListener { v: View? -> onItemSelect?.onItemLike(position,listData[position]) }
     }
 
     override fun getItemCount(): Int {
@@ -40,17 +41,23 @@ class AudioAdapter(private val context: Context) : RecyclerView.Adapter<AudioAda
         private val txtName: TextView
         private val txtTime: TextView
         private val imgThumb: ImageView
+        val imgLike: ImageView
 
         init {
             txtName = itemView.findViewById(R.id.txtName)
             txtTime = itemView.findViewById(R.id.txtTime)
             imgThumb = itemView.findViewById(R.id.imgThumb)
+            imgLike = itemView.findViewById(R.id.like)
         }
 
         fun setDisplayView(songDto: Song) {
             txtName.text = songDto.name
             txtTime.text = songDto.performer
-            Glide.with(itemView.context).load(songDto.thumbnail).placeholder(R.drawable.music).into(imgThumb)
+            Glide.with(itemView.context).load(songDto.thumbnail).placeholder(R.drawable.music)
+                .into(imgThumb)
+            Glide.with(itemView.context)
+                .load(if (songDto.like) R.drawable.star_slect else R.drawable.star).into(imgLike)
+
         }
     }
 
@@ -60,5 +67,6 @@ class AudioAdapter(private val context: Context) : RecyclerView.Adapter<AudioAda
 
     interface OnItemSelect {
         fun onItemSelect(pos: Int)
+        fun onItemLike(pos: Int, songDto: Song)
     }
 }

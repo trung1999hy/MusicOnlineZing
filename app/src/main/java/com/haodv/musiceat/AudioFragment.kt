@@ -22,6 +22,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.haodv.musiceat.databinding.FragmentAufioBinding
@@ -33,7 +34,6 @@ import com.haodv.musiceat.utils.Utils
 
 class AudioFragment : Fragment(), View.OnClickListener {
     private var songDtoList: ArrayList<Song> = arrayListOf()
-    private var songDto: Song? = null
     private var pos = 0
     private var imgBack: ImageView? = null
     private var imgNext: ImageView? = null
@@ -61,6 +61,7 @@ class AudioFragment : Fragment(), View.OnClickListener {
 
         }
     }
+    private val viewModel : MainViewModel by activityViewModels()
 
     private val listenerDuration = object : ListenerDuration {
         override fun duration(duration: Int, timeEnd: Int) {
@@ -146,9 +147,11 @@ class AudioFragment : Fragment(), View.OnClickListener {
             binding.imgLoop.setImageDrawable(
                 context?.getDrawable(R.drawable.ic_lap)
             )
-        downlod()
-        binding.imgDownload.visibility = if (isPlayLocal) View.GONE else View.VISIBLE
+        Glide.with(requireContext())
+            .load(if (songDtoList.get(pos).like) R.drawable.star_slect else R.drawable.star).into(binding.imgStar)
+        setClickLike()
     }
+
 
 
     private fun listener() {
@@ -182,6 +185,16 @@ class AudioFragment : Fragment(), View.OnClickListener {
             musicService.playPauseMedia()
         }
     }
+    private fun setClickLike(){
+        binding.imgStar.setOnClickListener {
+       val song =  songDtoList.get(pos).apply {
+            this.like  = !like
+        }
+            viewModel.upDateSong(pos,song)
+            Glide.with(requireContext())
+                .load(if (songDtoList.get(pos).like) R.drawable.star_slect else R.drawable.star).into(binding.imgStar)
+        }
+    }
 
     private fun eventPrevious() {
         if (MainApp.newInstance()?.isMyServiceRunning(MusicService::class.java) == false) {
@@ -212,69 +225,6 @@ class AudioFragment : Fragment(), View.OnClickListener {
             context?.let { Glide.with(it).load(R.drawable.ic_lap).into(binding.imgLoop) }
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun downlod() {
-        binding.mainWv.webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(
-                view: WebView,
-                request: WebResourceRequest
-            ): Boolean {
-                return super.shouldOverrideUrlLoading(view, request)
-            }
-
-            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                var url = url
-                super.shouldOverrideUrlLoading(view, url)
-                if (url.contains("http://")) {
-                    url = url.replace("http://", "https://")
-                }
-                val uri = Uri.parse(url)
-                songDto?.let { downloadData(uri, it) }
-                return true
-            }
-        }
-        binding.mainWv.settings.javaScriptEnabled = true
-        binding.imgDownload.setOnClickListener(View.OnClickListener { view: View? ->
-            MainApp.newInstance()?.preference?.apply {
-                if (this.getValueCoin() > 1) {
-                    this.setValueCoin(getValueCoin() - 1)
-                    val coin = MainApp.newInstance()?.preference?.getValueCoin()
-                    (activity as MainActivity).txtCoin?.text =
-                        String.format(resources.getString(R.string.value_coin), coin)
-                    songDto?.path?.let { binding.mainWv.loadUrl(it) }
-                    Toast.makeText(
-                        context,
-                        " Bạn đã mở mua lượt mở khóa thành công - 1 coin ",
-                        Toast.LENGTH_LONG
-                    ).show()
-                } else {
-                    Toast.makeText(
-                        context,
-                        "Bạn đã hết coin vui lòng mua thêm coin",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    startActivity(Intent(requireActivity(), PurchaseInAppActivity::class.java))
-                }
-            }
-
-        })
-    }
-
-    var downloadManager: DownloadManager? = null
-    private fun downloadData(uri: Uri, s: Song) {
-        downloadManager =
-            requireActivity()!!.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val request = DownloadManager.Request(uri)
-        request.setTitle("MP3Online download " + s.name)
-        request.setDescription("MP3Online downloading " + s.name)
-        request.setAllowedOverRoaming(false)
-        request.setDestinationInExternalPublicDir(
-            Environment.DIRECTORY_DOWNLOADS,
-            s.name + ".mp3"
-        )
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        downloadManager!!.enqueue(request)
-    }
 
 
     private fun controllerMedia() {

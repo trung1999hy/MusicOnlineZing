@@ -5,9 +5,11 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.haodv.musiceat.model.Data
+import com.haodv.musiceat.model.Song
 
 class Firebase {
-    var database = FirebaseDatabase.getInstance("https://musikloud-5ebb7-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    var database =
+        FirebaseDatabase.getInstance("https://musikloud-5ebb7-default-rtdb.asia-southeast1.firebasedatabase.app/")
     var myRef = database.getReference("Music")
 
     fun getSongList(callback: Callback<Data>) {
@@ -22,12 +24,19 @@ class Firebase {
             }
         })
     }
-    fun updateSongList(data: Data, callback: Callback<Data>){
+
+    fun updateSongList(data: Data, callback: Callback<Data>) {
         myRef.child("bxh").setValue(data).addOnCompleteListener {
             callback.Success(data)
         }.addOnFailureListener {
             callback.Err(it.message)
         }
+    }
+
+    fun upDateSong(position: Int, song: Song ) {
+        myRef.child("bxh").child("song").child(position.toString()).setValue(song)
+
+
     }
 
     interface Callback<T> {

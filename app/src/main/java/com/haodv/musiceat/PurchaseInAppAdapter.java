@@ -31,7 +31,8 @@ public class PurchaseInAppAdapter extends RecyclerView.Adapter<PurchaseInAppAdap
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View rootView = LayoutInflater.from(context).inflate(R.layout.item_subscription, parent, false);
+        View rootView = LayoutInflater.from(context).inflate(R.layout.
+                item_subscription, parent, false);
         return new ViewHolder(rootView);
     }
 

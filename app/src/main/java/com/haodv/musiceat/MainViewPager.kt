@@ -22,7 +22,7 @@ class MainViewPager(fm : FragmentManager) : FragmentPagerAdapter (fm) {
     override fun getPageTitle(position: Int): CharSequence? {
         return when (position) {
             0 -> "Bảng xếp hạng"
-            1 -> "Nhạc đã tải xuống"
+            1 -> "Bài hát ưa thích"
             else -> super.getPageTitle(position)
         }
 

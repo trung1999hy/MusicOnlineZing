@@ -8,5 +8,6 @@ class Song(
     val name: String? =null,
     val thumbnail: String? = null,
     val performer: String? = null,
+    var like : Boolean = false,
     var path : String ? = null
 ) : Serializable

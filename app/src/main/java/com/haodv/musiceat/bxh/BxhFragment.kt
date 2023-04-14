@@ -1,17 +1,18 @@
 package com.haodv.musiceat.bxh
 
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.haodv.musiceat.*
+import com.haodv.musiceat.AudioAdapter
+import com.haodv.musiceat.AudioFragment
+import com.haodv.musiceat.MainActivity
+import com.haodv.musiceat.R
 import com.haodv.musiceat.databinding.FragmentBxhBinding
-import com.haodv.musiceat.firebase.Firebase
-import com.haodv.musiceat.model.Data
+import com.haodv.musiceat.MainViewModel
 import com.haodv.musiceat.model.Song
 
 class BxhFragment : Fragment(), AudioAdapter.OnItemSelect {
@@ -24,8 +25,8 @@ class BxhFragment : Fragment(), AudioAdapter.OnItemSelect {
 
     private var listValue = ArrayList<Song>()
     private var pos = 1
+    private val viewModel: MainViewModel by activityViewModels()
 
-    private lateinit var viewModel: BxhViewModel
 
     private lateinit var binding: FragmentBxhBinding
     override fun onCreateView(
@@ -38,7 +39,6 @@ class BxhFragment : Fragment(), AudioAdapter.OnItemSelect {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this)[BxhViewModel::class.java]
         initView()
 
     }
@@ -48,36 +48,23 @@ class BxhFragment : Fragment(), AudioAdapter.OnItemSelect {
         (activity as MainActivity)?.setVisibility(View.VISIBLE)
         audioAdapter = AudioAdapter(requireContext())
         audioAdapter?.setOnItemSelect(this)
-        audio
+        viewModel.getMp3Songs()
+
+        val layoutManager = LinearLayoutManager(
+            requireContext(),
+            LinearLayoutManager.VERTICAL,
+            false
+        )
+        binding.listData.setHasFixedSize(true)
+        binding.listData.layoutManager = layoutManager
+        binding.listData.adapter = audioAdapter
+
+        viewModel.lisMusicLocal.observe(viewLifecycleOwner) {
+            audioAdapter!!.setData(it)
+            listValue = it
+        }
 
     }
-
-    private val audio: Unit
-        private get() {
-            Firebase().getSongList(object : Firebase.Callback<Data> {
-                override fun Success(data: Data) {
-                    listValue = data.song
-                    val layoutManager = LinearLayoutManager(
-                     requireContext(),
-                        LinearLayoutManager.VERTICAL,
-                        false
-                    )
-                    binding.listData.setHasFixedSize(true)
-                    binding.listData.layoutManager = layoutManager
-                    binding.listData.adapter = audioAdapter
-                    audioAdapter!!.setData(data.song)
-                }
-
-                override fun Err(err: String?) {
-                    Toast.makeText(
-                        requireContext(),
-                        err,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-
-            })
-        }
 
 
     override fun onItemSelect(pos: Int) {
@@ -86,6 +73,14 @@ class BxhFragment : Fragment(), AudioAdapter.OnItemSelect {
         songDto.play = true
         openPlayController(songDto)
 
+    }
+
+    override fun onItemLike(pos: Int, songDto: Song) {
+        songDto.apply {
+            this.like = !like
+        }
+        viewModel.upDateSong(pos, songDto)
+        audioAdapter?.notifyItemChanged(pos)
     }
 
     private fun openPlayController(songDto: Song) {
