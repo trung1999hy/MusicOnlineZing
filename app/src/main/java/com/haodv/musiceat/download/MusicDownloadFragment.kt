@@ -1,11 +1,13 @@
 package com.haodv.musiceat.download
 
-import androidx.lifecycle.ViewModelProvider
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.haodv.musiceat.*
 import com.haodv.musiceat.databinding.FragmentMusicDownloadBinding
@@ -20,7 +22,7 @@ class MusicDownloadFragment : Fragment(), AudioAdapter.OnItemSelect {
     private var audioAdapter: AudioAdapter? = null
     private var pos = 0
 
-    private  val viewModel: MainViewModel by activityViewModels()
+    private val viewModel: MainViewModel by activityViewModels()
     private lateinit var binding: FragmentMusicDownloadBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,7 +39,7 @@ class MusicDownloadFragment : Fragment(), AudioAdapter.OnItemSelect {
         audioAdapter = AudioAdapter(requireContext())
         audioAdapter?.setOnItemSelect(this)
         binding.rvData.adapter = audioAdapter
-        viewModel.lisMusicLocal.observe(viewLifecycleOwner) {songList ->
+        viewModel.lisMusicLocal.observe(viewLifecycleOwner) { songList ->
             audioAdapter?.setData(songList.filter { it.like } as ArrayList<Song>)
         }
 
@@ -53,11 +55,51 @@ class MusicDownloadFragment : Fragment(), AudioAdapter.OnItemSelect {
     }
 
     override fun onItemLike(pos: Int, songDto: Song) {
-        songDto.apply {
-            this.like = !like
+        val dialog = AlertDialog.Builder(requireContext())
+        dialog.setMessage("Bạn có muốn thêm vào danh sách yêu thích không và trừ 1 vàng ?")
+        dialog.setTitle("Thêm ? ")
+
+        dialog.setPositiveButton("Oke") { dialog, which ->
+            if (!songDto.like) {
+                MainApp.newInstance()?.preference?.apply {
+                    if (getValueCoin() > 1) {
+                        setValueCoin(getValueCoin() - 1)
+                        songDto.apply {
+                            this.like = !like
+                        }
+                        viewModel.upDateSong(pos, songDto)
+                        audioAdapter?.notifyItemChanged(pos)
+                        (activity as? MainActivity)?.txtCoin?.text = String.format(resources.getString(R.string.value_coin), getValueCoin())
+                        Toast.makeText(
+                            requireContext(),
+                            "Đã thêm  thành công và trù 1 vàng",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else startActivity(
+                        Intent(
+                            requireContext(),
+                            PurchaseInAppActivity::class.java
+                        )
+                    )
+                }
+            } else {
+                songDto.apply {
+                    this.like = !like
+                }
+                viewModel.upDateSong(pos, songDto)
+                audioAdapter?.notifyItemChanged(pos)
+                Toast.makeText(requireContext(), "Đã xóa thành công", Toast.LENGTH_SHORT).show()
+            }
+            dialog.dismiss()
+
         }
-        viewModel.upDateSong(pos, songDto)
-        audioAdapter?.notifyItemChanged(pos)
+        dialog.setNegativeButton("Dismiss") { dialog, which ->
+            dialog.dismiss()
+        }
+        dialog.create()
+        dialog.show()
+
+
     }
 
     private fun openPlayController(songDto: Song) {

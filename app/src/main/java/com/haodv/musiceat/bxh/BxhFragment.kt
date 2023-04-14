@@ -1,18 +1,17 @@
 package com.haodv.musiceat.bxh
 
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.haodv.musiceat.AudioAdapter
-import com.haodv.musiceat.AudioFragment
-import com.haodv.musiceat.MainActivity
-import com.haodv.musiceat.R
+import com.haodv.musiceat.*
 import com.haodv.musiceat.databinding.FragmentBxhBinding
-import com.haodv.musiceat.MainViewModel
 import com.haodv.musiceat.model.Song
 
 class BxhFragment : Fragment(), AudioAdapter.OnItemSelect {
@@ -76,11 +75,52 @@ class BxhFragment : Fragment(), AudioAdapter.OnItemSelect {
     }
 
     override fun onItemLike(pos: Int, songDto: Song) {
-        songDto.apply {
-            this.like = !like
+        val dialog = AlertDialog.Builder(requireContext())
+        if (songDto.like) {
+            dialog.setMessage("Bạn có muốn xóa khỏi danh sách yêu thích không?")
+                .setTitle("Xóa ?")
+        } else {
+            dialog.setMessage("Bạn có muốn thêm vào danh sách yêu thích không và trừ 1 vàng ?")
+            dialog.setTitle("Thêm ? ")
         }
-        viewModel.upDateSong(pos, songDto)
-        audioAdapter?.notifyItemChanged(pos)
+        dialog.setPositiveButton("Oke") { dialog, which ->
+            if (!songDto.like) {
+                MainApp.newInstance()?.preference?.apply {
+                    if (getValueCoin() > 1) {
+                        setValueCoin(getValueCoin() - 1)
+                        songDto.apply {
+                            this.like = !like
+                        }
+                        (activity as? MainActivity)?.txtCoin?.text = String.format(resources.getString(R.string.value_coin), getValueCoin())
+                        viewModel.upDateSong(pos, songDto)
+                        audioAdapter?.notifyItemChanged(pos)
+                        Toast.makeText(
+                            requireContext(),
+                            "Đã thêm  thành công và trù 1 vàng",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else startActivity(
+                        Intent(
+                            requireContext(),
+                            PurchaseInAppActivity::class.java
+                        )
+                    )
+                }
+            } else {
+                songDto.apply {
+                    this.like = !like
+                }
+                viewModel.upDateSong(pos, songDto)
+                audioAdapter?.notifyItemChanged(pos)
+                Toast.makeText(requireContext(), "Đã xóa thành công", Toast.LENGTH_SHORT).show()
+            }
+            dialog.dismiss()
+        }
+        dialog.setNegativeButton("Dismiss") { dialog, which ->
+            dialog.dismiss()
+        }
+            dialog.create()
+        dialog.show()
     }
 
     private fun openPlayController(songDto: Song) {

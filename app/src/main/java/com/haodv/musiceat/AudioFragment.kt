@@ -1,21 +1,15 @@
 package com.haodv.musiceat
 
-import android.annotation.SuppressLint
-import android.app.DownloadManager
+import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
@@ -61,7 +55,7 @@ class AudioFragment : Fragment(), View.OnClickListener {
 
         }
     }
-    private val viewModel : MainViewModel by activityViewModels()
+    private val viewModel: MainViewModel by activityViewModels()
 
     private val listenerDuration = object : ListenerDuration {
         override fun duration(duration: Int, timeEnd: Int) {
@@ -148,10 +142,10 @@ class AudioFragment : Fragment(), View.OnClickListener {
                 context?.getDrawable(R.drawable.ic_lap)
             )
         Glide.with(requireContext())
-            .load(if (songDtoList.get(pos).like) R.drawable.star_slect else R.drawable.star).into(binding.imgStar)
+            .load(if (songDtoList.get(pos).like) R.drawable.star_slect else R.drawable.star)
+            .into(binding.imgStar)
         setClickLike()
     }
-
 
 
     private fun listener() {
@@ -185,116 +179,167 @@ class AudioFragment : Fragment(), View.OnClickListener {
             musicService.playPauseMedia()
         }
     }
-    private fun setClickLike(){
+
+    private fun setClickLike() {
         binding.imgStar.setOnClickListener {
-       val song =  songDtoList.get(pos).apply {
-            this.like  = !like
-        }
-            viewModel.upDateSong(pos,song)
-            Glide.with(requireContext())
-                .load(if (songDtoList.get(pos).like) R.drawable.star_slect else R.drawable.star).into(binding.imgStar)
-        }
-    }
-
-    private fun eventPrevious() {
-        if (MainApp.newInstance()?.isMyServiceRunning(MusicService::class.java) == false) {
-            startServiceMusic(songDtoList, if (pos > 0) pos-- else songDtoList.size - 1)
-        } else {
-            musicService.eventPrevious()
-            listener()
-        }
-
-    }
-
-    private fun enventNext() {
-        if (MainApp.newInstance()?.isMyServiceRunning(MusicService::class.java) == false) {
-            startServiceMusic(songDtoList, if (pos < songDtoList.size) pos++ else 0)
-        } else {
-            musicService.eventNext()
-            listener()
-        }
-    }
-
-
-    private fun imgNextRandom() {
-        musicService?.setNextRandom(MainApp.newInstance()?.preference?.getNextRandom() == true)
-        MainApp.newInstance()?.preference?.setNextRandom(MainApp.newInstance()?.preference?.getNextRandom() != true)
-        if (MainApp.newInstance()?.preference?.getNextRandom() == true)
-            context?.let { Glide.with(it).load(R.drawable.ic_lap_enable).into(binding.imgLoop) }
-        else
-            context?.let { Glide.with(it).load(R.drawable.ic_lap).into(binding.imgLoop) }
-    }
-
-
-
-    private fun controllerMedia() {
-        val isPlay = musicService.getSong()?.play ?: false
-        if (isPlay) {
-            imgPlayPause!!.setImageDrawable(activity?.resources?.getDrawable(R.drawable.ic_pause))
-            lottieAnimationView!!.playAnimation()
-        } else {
-            imgPlayPause!!.setImageDrawable(activity?.resources?.getDrawable(R.drawable.ic_play))
-            lottieAnimationView!!.pauseAnimation()
-
-        }
-    }
-
-    fun progessbarListenr() {
-        sbTime?.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-
+            val dialog = AlertDialog.Builder(requireContext())
+            if (songDtoList.get(pos).like) {
+                dialog.setMessage("Bạn có muốn xóa khỏi danh sách yêu thích không?")
+                    .setTitle("Xóa ?")
+            } else {
+                dialog.setMessage("Bạn có muốn thêm vào danh sách yêu thích không và trừ 1 vàng ?")
+                dialog.setTitle("Thêm ? ")
             }
 
-            override fun onStartTrackingTouch(p0: SeekBar?) {
+            dialog.setPositiveButton("Oke") { dialog, which ->
+                if (!songDtoList.get(pos).like) {
+                    MainApp.newInstance()?.preference?.apply {
+                        if (getValueCoin() > 1) {
+                            setValueCoin(getValueCoin() - 1)
+                            val song = songDtoList.get(pos).apply {
+                                this.like = !like
+                            }
+                            viewModel.upDateSong(pos, song)
+                            (activity as? MainActivity)?.txtCoin?.text = String.format(resources.getString(R.string.value_coin), getValueCoin())
+                            Glide.with(requireContext())
+                                .load(if (songDtoList.get(pos).like) R.drawable.star_slect else R.drawable.star)
+                                .into(binding.imgStar)
+
+                            Toast.makeText(
+                                requireContext(),
+                                "Đã thêm  thành công và trù 1 vàng",
+                                Toast.LENGTH_SHORT
+
+                            ).show()
+                        } else startActivity(
+                            Intent(
+                                requireContext(),
+                                PurchaseInAppActivity::class.java
+                            )
+                        )
+                    }
+                } else {
+                    val song = songDtoList[pos].apply {
+                        this.like = !like
+                    }
+                    viewModel.upDateSong(pos, song)
+                    Glide.with(requireContext())
+                        .load(if (songDtoList[pos].like) R.drawable.star_slect else R.drawable.star)
+                        .into(binding.imgStar)
+
+                    Toast.makeText(requireContext(), "Đã xóa thành công", Toast.LENGTH_SHORT).show()
+                }
+                dialog.dismiss()
+
             }
-
-            override fun onStopTrackingTouch(p0: SeekBar?) {
-            }
-        })
-    }
-
-    fun duration(duration: Int, timeEnd: Int) {
-        val time = duration * 100
-        if (timeEnd != 0)
-            sbTime?.progress = time / timeEnd
-        else sbTime?.progress = 0
-        txtTime?.text = Utils.millisecondsToTime((timeEnd).toLong());
-        textTimeStart?.text = Utils.millisecondsToTime((duration).toLong())
-    }
+            dialog.setNegativeButton("Cancel") { dialog, which ->
+                dialog.dismiss()
+            }.create()
+            dialog.show()
 
 
-    fun event(keyEvent: String?, songDto: Song?) {
-        when (keyEvent) {
-            MainActivity.EVENT_NEXT, MainActivity.EVENT_PREVIOUS -> listener()
-            MainActivity.EVENT_PLAY_PAUSE -> controllerMedia()
-            MainActivity.EVENT_CLOSE -> cloes()
         }
+
+}
+
+private fun eventPrevious() {
+    if (MainApp.newInstance()?.isMyServiceRunning(MusicService::class.java) == false) {
+        startServiceMusic(songDtoList, if (pos > 0) pos-- else songDtoList.size - 1)
+    } else {
+        musicService.eventPrevious()
+        listener()
     }
 
-    private fun cloes() {
+}
+
+private fun enventNext() {
+    if (MainApp.newInstance()?.isMyServiceRunning(MusicService::class.java) == false) {
+        startServiceMusic(songDtoList, if (pos < songDtoList.size) pos++ else 0)
+    } else {
+        musicService.eventNext()
+        listener()
+    }
+}
+
+
+private fun imgNextRandom() {
+    musicService?.setNextRandom(MainApp.newInstance()?.preference?.getNextRandom() == true)
+    MainApp.newInstance()?.preference?.setNextRandom(MainApp.newInstance()?.preference?.getNextRandom() != true)
+    if (MainApp.newInstance()?.preference?.getNextRandom() == true)
+        context?.let { Glide.with(it).load(R.drawable.ic_lap_enable).into(binding.imgLoop) }
+    else
+        context?.let { Glide.with(it).load(R.drawable.ic_lap).into(binding.imgLoop) }
+}
+
+
+private fun controllerMedia() {
+    val isPlay = musicService.getSong()?.play ?: false
+    if (isPlay) {
+        imgPlayPause!!.setImageDrawable(activity?.resources?.getDrawable(R.drawable.ic_pause))
+        lottieAnimationView!!.playAnimation()
+    } else {
         imgPlayPause!!.setImageDrawable(activity?.resources?.getDrawable(R.drawable.ic_play))
         lottieAnimationView!!.pauseAnimation()
+
     }
+}
 
-    fun endCoin() {
-        Toast.makeText(activity, "Please purchase coin!", Toast.LENGTH_LONG).show()
-        activity?.startActivity(Intent(activity, PurchaseInAppActivity::class.java))
-    }
+fun progessbarListenr() {
+    sbTime?.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
+        override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
 
-
-    companion object {
-        fun newInstance(
-            songDtoList: ArrayList<Song>,
-            pos: Int,
-            isPlayLocal: Boolean = false
-        ): AudioFragment {
-            val audioFragment = AudioFragment()
-            audioFragment.songDtoList = songDtoList
-            audioFragment.pos = pos
-            audioFragment.isPlayLocal = isPlayLocal
-            return audioFragment
         }
+
+        override fun onStartTrackingTouch(p0: SeekBar?) {
+        }
+
+        override fun onStopTrackingTouch(p0: SeekBar?) {
+        }
+    })
+}
+
+fun duration(duration: Int, timeEnd: Int) {
+    val time = duration * 100
+    if (timeEnd != 0)
+        sbTime?.progress = time / timeEnd
+    else sbTime?.progress = 0
+    txtTime?.text = Utils.millisecondsToTime((timeEnd).toLong());
+    textTimeStart?.text = Utils.millisecondsToTime((duration).toLong())
+}
+
+
+fun event(keyEvent: String?, songDto: Song?) {
+    when (keyEvent) {
+        MainActivity.EVENT_NEXT, MainActivity.EVENT_PREVIOUS -> listener()
+        MainActivity.EVENT_PLAY_PAUSE -> controllerMedia()
+        MainActivity.EVENT_CLOSE -> cloes()
     }
+}
+
+private fun cloes() {
+    imgPlayPause!!.setImageDrawable(activity?.resources?.getDrawable(R.drawable.ic_play))
+    lottieAnimationView!!.pauseAnimation()
+}
+
+fun endCoin() {
+    Toast.makeText(activity, "Please purchase coin!", Toast.LENGTH_LONG).show()
+    activity?.startActivity(Intent(activity, PurchaseInAppActivity::class.java))
+}
+
+
+companion object {
+    fun newInstance(
+        songDtoList: ArrayList<Song>,
+        pos: Int,
+        isPlayLocal: Boolean = false
+    ): AudioFragment {
+        val audioFragment = AudioFragment()
+        audioFragment.songDtoList = songDtoList
+        audioFragment.pos = pos
+        audioFragment.isPlayLocal = isPlayLocal
+        return audioFragment
+    }
+}
 
 
 }
