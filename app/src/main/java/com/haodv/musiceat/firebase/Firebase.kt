@@ -9,7 +9,7 @@ import com.haodv.musiceat.model.Song
 
 class Firebase {
     var database =
-        FirebaseDatabase.getInstance("https://musikloud-5ebb7-default-rtdb.asia-southeast1.firebasedatabase.app/")
+        FirebaseDatabase.getInstance("https://music-8c982-default-rtdb.asia-southeast1.firebasedatabase.app/")
     var myRef = database.getReference("Music")
 
     fun getSongList(callback: Callback<Data>) {

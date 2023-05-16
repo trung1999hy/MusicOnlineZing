@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         txtCoin = findViewById(R.id.txtCoin)
         binding.container.adapter = MainViewPager(supportFragmentManager)
         binding.tablayou.setupWithViewPager(binding.container)
-        binding.tablayou.getTabAt(0)?.icon = getDrawable(R.drawable.img)
+        binding.tablayou.getTabAt(0)?.icon = getDrawable(R.drawable.trophy)
         binding.tablayou.getTabAt(1)?.icon = getDrawable(R.drawable.music)
     }
 

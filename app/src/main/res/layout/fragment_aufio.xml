@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        app:srcCompat="@drawable/bg" />
+        app:srcCompat="@drawable/bg_main" />
 
 
     <ImageView
@@ -29,36 +29,42 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_back" />
 
+    <me.relex.circleindicator.CircleIndicator
+        android:id="@+id/indicator"
+        android:layout_width="match_parent"
+        android:layout_height="18dp"
+        android:layout_marginTop="24dp"
+        app:ci_gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@+id/txtName" />
 
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/lottieAnimationView"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginBottom="150dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:lottie_autoPlay="true"
-        app:lottie_fileName="view_play.json"
-        app:lottie_loop="true" />
+        app:layout_constraintTop_toBottomOf="@+id/indicator" />
 
     <TextView
         android:id="@+id/txtName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:gravity="center"
         android:ellipsize="marquee"
-        android:singleLine="true"
+        android:gravity="center"
         android:marqueeRepeatLimit="marquee_forever"
-        android:scrollHorizontally="true"
-        android:textIsSelectable="true"
         android:maxLines="1"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
         android:text="@string/app_name"
         android:textColor="@color/white"
+        android:textIsSelectable="true"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@+id/imgBack"
-        app:layout_constraintEnd_toEndOf="@+id/lottieAnimationView"
+        app:layout_constraintEnd_toEndOf="@+id/viewPager"
         app:layout_constraintStart_toEndOf="@+id/imgBack"
         app:layout_constraintTop_toTopOf="@+id/main_wv" />
 
@@ -82,7 +88,7 @@
         android:padding="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lottieAnimationView"
+        app:layout_constraintTop_toBottomOf="@+id/viewPager"
         app:srcCompat="@drawable/ic_pause" />
 
     <ImageView
@@ -146,7 +152,7 @@
         android:layout_height="38dp"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="12dp"
-        android:src="@drawable/star"
+        android:src="@drawable/love"
         app:layout_constraintBottom_toTopOf="@+id/sbTime"
         app:layout_constraintEnd_toEndOf="parent" />
 

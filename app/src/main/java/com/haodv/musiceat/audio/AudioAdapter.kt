@@ -1,4 +1,4 @@
-package com.haodv.musiceat
+package com.haodv.musiceat.audio
 
 import android.content.Context
 import android.os.Handler
@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.haodv.musiceat.R
 import com.haodv.musiceat.model.Song
 
 class AudioAdapter(private val context: Context) : RecyclerView.Adapter<AudioAdapter.ViewHolder>() {
@@ -56,7 +57,7 @@ class AudioAdapter(private val context: Context) : RecyclerView.Adapter<AudioAda
             Glide.with(itemView.context).load(songDto.thumbnail).placeholder(R.drawable.music)
                 .into(imgThumb)
             Glide.with(itemView.context)
-                .load(if (songDto.like) R.drawable.star_slect else R.drawable.star).into(imgLike)
+                .load(if (songDto.like) R.drawable.heart else R.drawable.love).into(imgLike)
 
         }
     }

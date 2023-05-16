@@ -10,6 +10,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.haodv.musiceat.*
+import com.haodv.musiceat.audio.AudioAdapter
+import com.haodv.musiceat.audio.AudioFragment
 import com.haodv.musiceat.databinding.FragmentMusicDownloadBinding
 import com.haodv.musiceat.model.Song
 

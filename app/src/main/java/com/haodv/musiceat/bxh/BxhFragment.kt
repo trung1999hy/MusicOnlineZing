@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.haodv.musiceat.*
+import com.haodv.musiceat.audio.AudioAdapter
+import com.haodv.musiceat.audio.AudioFragment
 import com.haodv.musiceat.databinding.FragmentBxhBinding
 import com.haodv.musiceat.model.Song
 

@@ -9,7 +9,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -20,7 +20,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            app:srcCompat="@drawable/bg" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/bg_main" />
 
         <TextView
             android:id="@+id/textView"
@@ -28,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="Music Internal"
+            android:text="Music"
             android:textColor="@color/white"
             android:textSize="21sp"
             android:textStyle="bold"
@@ -59,27 +62,25 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_coin" />
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tablayou"
-            android:layout_width="0dp"
-            android:layout_height="?actionBarSize"
-            android:layout_marginTop="16dp"
-            android:background="#03FFFFFF"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView"
-            app:tabMode="fixed" />
-
-
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginTop="24dp"
+            app:layout_constraintBottom_toTopOf="@+id/tablayou"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tablayou"
+            android:layout_width="0dp"
+            android:layout_height="?actionBarSize"
+            android:background="#03FFFFFF"
             app:layout_constraintBottom_toBottomOf="@+id/imageView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tablayou" />
-
+            app:tabMode="fixed" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -87,6 +88,4 @@
         android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
