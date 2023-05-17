@@ -171,7 +171,7 @@ class MusicService : Service() {
             ACTION_CLOSE -> {
                 listenerDuration?.event(MainActivity.EVENT_CLOSE, listSong.getOrNull(position))
                 listenerDuration?.unbind(isBinder)
-                stopSelf()
+               onDestroy()
             }
         }
     }

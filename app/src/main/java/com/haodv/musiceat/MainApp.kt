@@ -13,6 +13,7 @@ class MainApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         preference = Preference.buildInstance(this)
         if (preference?.firstInstall == false) {
