@@ -1,4 +1,4 @@
-package com.trungtv.Onmuzik.bxh
+package com.trungtv.Onmuzik.like
 
 import android.app.AlertDialog
 import android.content.Intent
@@ -9,82 +9,58 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.trungtv.Onmuzik.*
 import com.trungtv.Onmuzik.audio.AudioAdapter
 import com.trungtv.Onmuzik.audio.AudioFragment
-import com.trungtv.Onmuzik.databinding.FragmentBxhBinding
+import com.trungtv.Onmuzik.databinding.FragmentMusicDownloadBinding
 import com.trungtv.Onmuzik.model.Song
 
-class BxhFragment : Fragment(), AudioAdapter.OnItemSelect {
+class LikeFragment : Fragment(), AudioAdapter.OnItemSelect {
 
     companion object {
-        fun newInstance() = BxhFragment()
+        fun newInstance() = LikeFragment()
     }
 
     private var audioAdapter: AudioAdapter? = null
+    private var pos = 0
 
-    private var listValue = ArrayList<Song>()
-    private var pos = 1
     private val viewModel: MainViewModel by activityViewModels()
-
-
-    private lateinit var binding: FragmentBxhBinding
+    private lateinit var binding: FragmentMusicDownloadBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentBxhBinding.inflate(layoutInflater, container, false)
+        binding = FragmentMusicDownloadBinding.inflate(layoutInflater, container, false)
         return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        initView()
-
-    }
-
-
-    private fun initView() {
         (activity as MainActivity)?.setVisibility(View.VISIBLE)
+        viewModel.getMp3Songs()
         audioAdapter = AudioAdapter(requireContext())
         audioAdapter?.setOnItemSelect(this)
-        viewModel.getMp3Songs()
-
-        val layoutManager = LinearLayoutManager(
-            requireContext(),
-            LinearLayoutManager.VERTICAL,
-            false
-        )
-        binding.listData.setHasFixedSize(true)
-        binding.listData.layoutManager = layoutManager
-        binding.listData.adapter = audioAdapter
-
-        viewModel.lisMusicLocal.observe(viewLifecycleOwner) {
-            audioAdapter!!.setData(it)
-            listValue = it
+        binding.rvData.adapter = audioAdapter
+        viewModel.lisMusicLocal.observe(viewLifecycleOwner) { songList ->
+            audioAdapter?.setData(songList.filter { it.like } as ArrayList<Song>)
         }
+
 
     }
 
-
     override fun onItemSelect(pos: Int) {
-        val songDto = listValue[pos]
+        val songDto = viewModel.lisMusicLocal.value?.get(pos)
         this.pos = pos
-        songDto.play = true
-        openPlayController(songDto)
+        songDto?.play = true
+        songDto?.let { openPlayController(it) }
 
     }
 
     override fun onItemLike(pos: Int, songDto: Song) {
         val dialog = AlertDialog.Builder(requireContext())
-        if (songDto.like) {
-            dialog.setMessage("Bạn có muốn xóa khỏi danh sách yêu thích không?")
-                .setTitle("Xóa ?")
-        } else {
-            dialog.setMessage("Bạn có muốn thêm vào danh sách yêu thích không và trừ 1 vàng ?")
-            dialog.setTitle("Thêm ? ")
-        }
+        dialog.setMessage("Bạn có muốn thêm vào danh sách yêu thích không và trừ 1 vàng ?")
+        dialog.setTitle("Thêm ? ")
+
         dialog.setPositiveButton("Oke") { dialog, which ->
             if (!songDto.like) {
                 MainApp.newInstance()?.preference?.apply {
@@ -93,9 +69,9 @@ class BxhFragment : Fragment(), AudioAdapter.OnItemSelect {
                         songDto.apply {
                             this.like = !like
                         }
-                        (activity as? MainActivity)?.txtCoin?.text = String.format(resources.getString(R.string.value_coin), getValueCoin())
                         viewModel.upDateSong(pos, songDto)
                         audioAdapter?.notifyItemChanged(pos)
+                        (activity as? MainActivity)?.txtCoin?.text = String.format(resources.getString(R.string.value_coin), getValueCoin())
                         Toast.makeText(
                             requireContext(),
                             "Đã thêm  thành công và trù 1 vàng",
@@ -117,12 +93,15 @@ class BxhFragment : Fragment(), AudioAdapter.OnItemSelect {
                 Toast.makeText(requireContext(), "Đã xóa thành công", Toast.LENGTH_SHORT).show()
             }
             dialog.dismiss()
+
         }
         dialog.setNegativeButton("Dismiss") { dialog, which ->
             dialog.dismiss()
         }
-            dialog.create()
+        dialog.create()
         dialog.show()
+
+
     }
 
     private fun openPlayController(songDto: Song) {
@@ -134,9 +113,14 @@ class BxhFragment : Fragment(), AudioAdapter.OnItemSelect {
             R.anim.slide_in_top,
             R.anim.slide_out_top
         )
-        transaction.add(R.id.frameLayout, AudioFragment.newInstance(listValue, pos))
+        transaction.add(
+            R.id.frameLayout,
+            AudioFragment.newInstance(
+                viewModel.lisMusicLocal.value?.filter { it.like } as ArrayList<Song>,
+                pos,
+            )
+        )
             .addToBackStack(AudioFragment::class.java.name).commit()
-
     }
 
 }

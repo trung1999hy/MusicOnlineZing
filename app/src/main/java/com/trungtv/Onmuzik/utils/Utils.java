@@ -8,7 +8,7 @@ import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.provider.MediaStore;
 
-import com.trungtv.Onmuzik.SongDto;
+import com.trungtv.Onmuzik.model.SongDto;
 
 import java.io.File;
 import java.util.ArrayList;

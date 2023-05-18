@@ -1,4 +1,4 @@
-package com.trungtv.Onmuzik;
+package com.trungtv.Onmuzik.model;
 
 import android.graphics.Bitmap;
 

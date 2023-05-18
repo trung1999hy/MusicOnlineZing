@@ -3,8 +3,8 @@ package com.trungtv.Onmuzik
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.trungtv.Onmuzik.bxh.BxhFragment
-import com.trungtv.Onmuzik.download.MusicDownloadFragment
+import com.trungtv.Onmuzik.charts.ChartsFragment
+import com.trungtv.Onmuzik.like.LikeFragment
 
 class MainViewPager(fm : FragmentManager) : FragmentPagerAdapter (fm) {
     override fun getCount(): Int {
@@ -13,9 +13,9 @@ class MainViewPager(fm : FragmentManager) : FragmentPagerAdapter (fm) {
 
     override fun getItem(position: Int): Fragment {
         return when (position){
-            0 -> BxhFragment.newInstance()
-            1 -> MusicDownloadFragment.newInstance()
-            else -> BxhFragment.newInstance()
+            0 -> ChartsFragment.newInstance()
+            1 -> LikeFragment.newInstance()
+            else -> ChartsFragment.newInstance()
         }
     }
 
