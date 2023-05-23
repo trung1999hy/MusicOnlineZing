@@ -1,4 +1,4 @@
-package com.trungtv.Onmuzik
+package com.trungtv.Onmuzik.ui
 
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -17,6 +17,7 @@ import com.android.billingclient.api.ConsumeParams
 import com.android.billingclient.api.ConsumeResponseListener
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.QueryPurchasesParams
+import com.trungtv.Onmuzik.R
 
 class SplashActivity : AppCompatActivity() {
 

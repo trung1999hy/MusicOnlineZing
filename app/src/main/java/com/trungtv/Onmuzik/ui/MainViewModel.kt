@@ -1,4 +1,4 @@
-package com.trungtv.Onmuzik
+package com.trungtv.Onmuzik.ui
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

@@ -1,10 +1,10 @@
-package com.trungtv.Onmuzik
+package com.trungtv.Onmuzik.ui
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.trungtv.Onmuzik.charts.ChartsFragment
-import com.trungtv.Onmuzik.like.LikeFragment
+import com.trungtv.Onmuzik.ui.charts.ChartsFragment
+import com.trungtv.Onmuzik.ui.like.LikeFragment
 
 class MainViewPager(fm : FragmentManager) : FragmentPagerAdapter (fm) {
     override fun getCount(): Int {

@@ -1,4 +1,4 @@
-package com.trungtv.Onmuzik.audio
+package com.trungtv.Onmuzik.ui.audio
 
 import android.app.AlertDialog
 import android.content.ComponentName
@@ -18,17 +18,17 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
-import com.trungtv.Onmuzik.MainActivity
-import com.trungtv.Onmuzik.MainApp
-import com.trungtv.Onmuzik.MainViewModel
-import com.trungtv.Onmuzik.PurchaseInAppActivity
+import com.trungtv.Onmuzik.ui.MainActivity
+import com.trungtv.Onmuzik.ui.MainApp
+import com.trungtv.Onmuzik.ui.MainViewModel
+import com.trungtv.Onmuzik.ui.PurchaseInAppActivity
 import com.trungtv.Onmuzik.R
 import com.trungtv.Onmuzik.databinding.FragmentAufioBinding
-import com.trungtv.Onmuzik.lyric.LyricFragment
-import com.trungtv.Onmuzik.lyric.LyricsAdapter
+import com.trungtv.Onmuzik.ui.lyric.LyricFragment
+import com.trungtv.Onmuzik.ui.lyric.LyricsAdapter
 import com.trungtv.Onmuzik.model.LyricLine
 import com.trungtv.Onmuzik.model.Song
-import com.trungtv.Onmuzik.nolyric.NoLyricFragment
+import com.trungtv.Onmuzik.ui.nolyric.NoLyricFragment
 import com.trungtv.Onmuzik.service.ListenerDuration
 import com.trungtv.Onmuzik.service.MusicService
 import com.trungtv.Onmuzik.utils.Utils

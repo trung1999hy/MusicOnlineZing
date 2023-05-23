@@ -1,4 +1,4 @@
-package com.trungtv.Onmuzik.lyric
+package com.trungtv.Onmuzik.ui.lyric
 
 import android.os.Bundle
 import android.view.LayoutInflater

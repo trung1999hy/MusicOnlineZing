@@ -1,4 +1,4 @@
-package com.trungtv.Onmuzik.like
+package com.trungtv.Onmuzik.ui.like
 
 import android.app.AlertDialog
 import android.content.Intent
@@ -10,10 +10,14 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.trungtv.Onmuzik.*
-import com.trungtv.Onmuzik.audio.AudioAdapter
-import com.trungtv.Onmuzik.audio.AudioFragment
+import com.trungtv.Onmuzik.ui.audio.AudioAdapter
+import com.trungtv.Onmuzik.ui.audio.AudioFragment
 import com.trungtv.Onmuzik.databinding.FragmentMusicDownloadBinding
 import com.trungtv.Onmuzik.model.Song
+import com.trungtv.Onmuzik.ui.MainActivity
+import com.trungtv.Onmuzik.ui.MainApp
+import com.trungtv.Onmuzik.ui.MainViewModel
+import com.trungtv.Onmuzik.ui.PurchaseInAppActivity
 
 class LikeFragment : Fragment(), AudioAdapter.OnItemSelect {
 

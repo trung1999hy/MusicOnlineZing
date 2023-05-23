@@ -1,4 +1,4 @@
-package com.trungtv.Onmuzik.audio
+package com.trungtv.Onmuzik.ui.audio
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager

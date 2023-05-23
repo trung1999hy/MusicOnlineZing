@@ -1,4 +1,4 @@
-package com.trungtv.Onmuzik.nolyric
+package com.trungtv.Onmuzik.ui.nolyric
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle

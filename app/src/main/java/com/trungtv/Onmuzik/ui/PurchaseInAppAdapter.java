@@ -1,4 +1,4 @@
-package com.trungtv.Onmuzik;
+package com.trungtv.Onmuzik.ui;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -11,6 +11,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.billingclient.api.ProductDetails;
+import com.trungtv.Onmuzik.R;
 import com.trungtv.Onmuzik.utils.Constants;
 
 import java.util.ArrayList;

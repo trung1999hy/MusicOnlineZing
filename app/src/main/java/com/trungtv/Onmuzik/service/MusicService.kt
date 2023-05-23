@@ -16,7 +16,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
-import com.trungtv.Onmuzik.MainActivity
+import com.trungtv.Onmuzik.ui.MainActivity
 import com.trungtv.Onmuzik.R
 import com.trungtv.Onmuzik.model.Song
 import kotlin.random.Random

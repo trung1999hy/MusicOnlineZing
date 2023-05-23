@@ -1,4 +1,4 @@
-package com.trungtv.Onmuzik
+package com.trungtv.Onmuzik.ui
 
 import android.app.ActivityManager
 import android.app.Application

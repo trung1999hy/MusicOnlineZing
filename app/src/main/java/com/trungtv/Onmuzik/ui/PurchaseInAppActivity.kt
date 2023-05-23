@@ -1,4 +1,4 @@
-package com.trungtv.Onmuzik
+package com.trungtv.Onmuzik.ui
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -14,6 +14,7 @@ import com.android.billingclient.api.BillingClient.ProductType
 import com.android.billingclient.api.BillingFlowParams.ProductDetailsParams
 import com.android.billingclient.api.QueryProductDetailsParams.Product
 import com.google.common.collect.ImmutableList
+import com.trungtv.Onmuzik.R
 import com.trungtv.Onmuzik.utils.Constants
 
 class PurchaseInAppActivity : AppCompatActivity(), PurchaseInAppAdapter.OnClickListener {

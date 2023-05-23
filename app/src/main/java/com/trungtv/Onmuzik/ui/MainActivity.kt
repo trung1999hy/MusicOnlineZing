@@ -1,4 +1,4 @@
-package com.trungtv.Onmuzik
+package com.trungtv.Onmuzik.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,7 +6,8 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.trungtv.Onmuzik.MainApp.Companion.newInstance
+import com.trungtv.Onmuzik.ui.MainApp.Companion.newInstance
+import com.trungtv.Onmuzik.R
 import com.trungtv.Onmuzik.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
