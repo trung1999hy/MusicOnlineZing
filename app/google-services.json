@@ -1,45 +1,27 @@
 {
   "project_info": {
-    "project_number": "269507090437",
-    "firebase_url": "https://musikloud-5ebb7-default-rtdb.asia-southeast1.firebasedatabase.app",
-    "project_id": "musikloud-5ebb7",
-    "storage_bucket": "musikloud-5ebb7.appspot.com"
+    "project_number": "180896531857",
+    "firebase_url": "https://music-70349-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "music-70349",
+    "storage_bucket": "music-70349.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:269507090437:android:fa82c2255cc01d5176646c",
+        "mobilesdk_app_id": "1:180896531857:android:6fc1d573865916d1c38630",
         "android_client_info": {
-          "package_name": "com.trungtv.Onmuzik"
+          "package_name": "com.thn.muisic"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "269507090437-rq8neq3d7lm3f5k0mf2n28j6kdflsbtg.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.trungtv.Onmuzik",
-            "certificate_hash": "beead2e1b655c56945b29f00c904c9b97b772ba1"
-          }
-        },
-        {
-          "client_id": "269507090437-hpmjero570hq1j6h74l3551frjgv52jm.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBmE1WxYOiG9yJfBIyYGN2jd4iRjtCL1aM"
+          "current_key": "AIzaSyDPvPuZnLLGXdYyZkc1ZwW3IIapIhIc-_Q"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "269507090437-hpmjero570hq1j6h74l3551frjgv52jm.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

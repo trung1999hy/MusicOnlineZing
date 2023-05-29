@@ -3,7 +3,7 @@ package com.trungtv.Onmuzik.ui
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.trungtv.Onmuzik.firebase.Firebase
+import com.trungtv.Onmuzik.firebase.FirebaseRepsonit
 import com.trungtv.Onmuzik.model.Data
 import com.trungtv.Onmuzik.model.Song
 import kotlinx.coroutines.Dispatchers
@@ -11,13 +11,13 @@ import kotlinx.coroutines.launch
 
 
 class MainViewModel : ViewModel() {
-    private val firebase = Firebase()
+    private val firebaseRepsonit = FirebaseRepsonit()
     val lisMusicLocal: MutableLiveData<ArrayList<Song>> = MutableLiveData()
 
 
     fun getMp3Songs() {
         viewModelScope.launch(Dispatchers.IO) {
-            firebase.getSongList(object : Firebase.Callback<Data> {
+            firebaseRepsonit.getSongList(object : FirebaseRepsonit.Callback<Data> {
                 override fun Success(data: Data) {
                     lisMusicLocal.postValue(data.song)
                 }
@@ -31,7 +31,7 @@ class MainViewModel : ViewModel() {
 
     fun upDateSong(position: Int, song: Song ) {
         viewModelScope.launch {
-            firebase.upDateSong(position, song)
+            firebaseRepsonit.upDateSong(position, song)
             getMp3Songs()
         }
     }
