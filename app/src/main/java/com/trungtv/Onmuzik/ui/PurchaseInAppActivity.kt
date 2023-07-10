@@ -134,6 +134,10 @@ class PurchaseInAppActivity : AppCompatActivity(), PurchaseInAppAdapter.OnClickL
             Product.newBuilder()
                 .setProductId(Constants.KEY_200_COIN)
                 .setProductType(ProductType.INAPP)
+                .build(),
+            Product.newBuilder()
+                .setProductId(Constants.KEY_COIN)
+                .setProductType(ProductType.INAPP)
                 .build()
         )
 
@@ -216,6 +220,7 @@ class PurchaseInAppActivity : AppCompatActivity(), PurchaseInAppAdapter.OnClickL
             Constants.KEY_100_COIN -> 500
             Constants.KEY_150_COIN -> 700
             Constants.KEY_200_COIN -> 999
+            Constants.KEY_COIN -> 5
             else -> 0
         }
     }
