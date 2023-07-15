@@ -82,17 +82,19 @@ public class PurchaseInAppAdapter extends RecyclerView.Adapter<PurchaseInAppAdap
     private String setTitleValue(String productId, String price) {
         switch (productId) {
             case Constants.KEY_10_COIN:
-                return String.format(context.getResources().getString(R.string.message_purchase_one), price + "/5 coin");
-            case Constants.KEY_20_COIN:
-                return String.format(context.getResources().getString(R.string.message_purchase_one), price + "/10 coin");
-            case Constants.KEY_50_COIN:
-                return String.format(context.getResources().getString(R.string.message_purchase_one), price + "/20 coin");
-            case Constants.KEY_100_COIN:
-                return String.format(context.getResources().getString(R.string.message_purchase_one), price + "/30 coin");
-            case Constants.KEY_150_COIN:
                 return String.format(context.getResources().getString(R.string.message_purchase_one), price + "/100 coin");
-            case Constants.KEY_200_COIN:
+            case Constants.KEY_20_COIN:
                 return String.format(context.getResources().getString(R.string.message_purchase_one), price + "/150 coin");
+            case Constants.KEY_50_COIN:
+                return String.format(context.getResources().getString(R.string.message_purchase_one), price + "/300 coin");
+            case Constants.KEY_100_COIN:
+                return String.format(context.getResources().getString(R.string.message_purchase_one), price + "/500 coin");
+            case Constants.KEY_150_COIN:
+                return String.format(context.getResources().getString(R.string.message_purchase_one), price + "/700 coin");
+            case Constants.KEY_200_COIN:
+                return String.format(context.getResources().getString(R.string.message_purchase_one), price + "/999 coin");
+            case Constants.KEY_COIN:
+                return String.format(context.getResources().getString(R.string.message_purchase_one), price + "/5 coin");
             default:
                 return String.format(context.getResources().getString(R.string.message_purchase_one), "/0 coin");
         }
