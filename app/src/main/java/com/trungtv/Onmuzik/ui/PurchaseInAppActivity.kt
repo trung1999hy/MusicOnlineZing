@@ -200,9 +200,9 @@ class PurchaseInAppActivity : AppCompatActivity(), PurchaseInAppAdapter.OnClickL
 
     private fun setupResult(proId: String, quantity: Int) {
         val intent = Intent()
-        //        int totalCoin = MainApp.newInstance().getPreference().getValueCoin();
-//        int remainCoin = totalCoin + getCoinFromKey(proId) * quantity;
-//        MainApp.newInstance().getPreference().setValueCoin(remainCoin);
+        val totalCoin = MainApp.newInstance()?.preference?.getValueCoin() ?: 0
+        val remainCoin = totalCoin + getCoinFromKey(proId) * quantity;
+        MainApp.newInstance()?.preference?.setValueCoin(remainCoin);
 //        intent.putExtra(Constants.COIN_ORDER_RESULT, remainCoin + "");
         setResult(RESULT_OK, intent)
         runOnUiThread { onBackPressed() }
