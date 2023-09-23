@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.trungtv.Onmuzik.ui.MainApp.Companion.newInstance
 import com.trungtv.Onmuzik.R
 import com.trungtv.Onmuzik.databinding.ActivityMainBinding
+import com.trungtv.Onmuzik.model.User
 
 class MainActivity : AppCompatActivity() {
     private var frameLayout: FrameLayout? = null
@@ -58,8 +60,34 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        val coin = newInstance()?.preference?.getValueCoin()
-        txtCoin?.text = String.format(resources.getString(R.string.value_coin), coin)
+        getData()
+    }
+    private fun setDataBaseGold(){
+        val dataController = DataController(MainApp.newInstance()?.deviceId?:"")
+        dataController.writeNewUser(MainApp.newInstance()?.deviceId?:"",  100)
+    }
+
+    fun getData(){
+        val dataController = DataController(MainApp.newInstance()?.deviceId?:"")
+        dataController.setOnListenerFirebase(object : DataController.OnListenerFirebase {
+            override fun onCompleteGetUser(user: User?) {
+                user?.let {
+                    MainApp.newInstance()?.preference?.setValueCoin(user.coin)
+                } ?: kotlin.run {
+                    setDataBaseGold()
+                }
+                binding.txtCoin.text = String.format(resources.getString(R.string.amount_gold), MainApp.newInstance()?.preference?.getValueCoin())
+            }
+
+            override fun onSuccess() {
+
+            }
+
+            override fun onFailure() {
+                Toast.makeText(this@MainActivity, "Có lỗi kết nối đến server!", Toast.LENGTH_LONG).show()
+            }
+        })
+        dataController.user
     }
 
     companion object {

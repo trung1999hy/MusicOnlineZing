@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
 import android.media.AudioManager
+import android.provider.Settings
 import com.trungtv.Onmuzik.utils.Preference
 
 class MainApp : Application() {
@@ -49,4 +50,6 @@ class MainApp : Application() {
             return instance
         }
     }
+    val deviceId: String
+        get() = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
 }

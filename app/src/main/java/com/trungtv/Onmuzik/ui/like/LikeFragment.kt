@@ -14,6 +14,7 @@ import com.trungtv.Onmuzik.ui.audio.AudioAdapter
 import com.trungtv.Onmuzik.ui.audio.AudioFragment
 import com.trungtv.Onmuzik.databinding.FragmentMusicDownloadBinding
 import com.trungtv.Onmuzik.model.Song
+import com.trungtv.Onmuzik.ui.DataController
 import com.trungtv.Onmuzik.ui.MainActivity
 import com.trungtv.Onmuzik.ui.MainApp
 import com.trungtv.Onmuzik.ui.MainViewModel
@@ -75,7 +76,8 @@ class LikeFragment : Fragment(), AudioAdapter.OnItemSelect {
                         }
                         viewModel.upDateSong(pos, songDto)
                         audioAdapter?.notifyItemChanged(pos)
-                        (activity as? MainActivity)?.txtCoin?.text = String.format(resources.getString(R.string.value_coin), getValueCoin())
+                        updateGold()
+                        (activity as? MainActivity)?.getData()
                         Toast.makeText(
                             requireContext(),
                             "Đã thêm  thành công và trù 1 vàng",
@@ -125,6 +127,10 @@ class LikeFragment : Fragment(), AudioAdapter.OnItemSelect {
             )
         )
             .addToBackStack(AudioFragment::class.java.name).commit()
+    }
+    private fun updateGold() {
+        val dataController = DataController(MainApp.newInstance()?.deviceId ?: "")
+        dataController.updateDocument(MainApp.newInstance()?.preference?.getValueCoin() ?: 0)
     }
 
 }

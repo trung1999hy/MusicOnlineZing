@@ -43,7 +43,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text=" 0 Coin"
             android:textColor="@color/color_red_043"
             android:textSize="18sp"
             android:textStyle="bold"

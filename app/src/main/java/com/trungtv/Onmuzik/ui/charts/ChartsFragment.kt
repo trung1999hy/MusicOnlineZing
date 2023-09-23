@@ -15,6 +15,7 @@ import com.trungtv.Onmuzik.ui.audio.AudioAdapter
 import com.trungtv.Onmuzik.ui.audio.AudioFragment
 import com.trungtv.Onmuzik.databinding.FragmentChartsBinding
 import com.trungtv.Onmuzik.model.Song
+import com.trungtv.Onmuzik.ui.DataController
 import com.trungtv.Onmuzik.ui.MainActivity
 import com.trungtv.Onmuzik.ui.MainApp
 import com.trungtv.Onmuzik.ui.MainViewModel
@@ -97,7 +98,8 @@ class ChartsFragment : Fragment(), AudioAdapter.OnItemSelect {
                         songDto.apply {
                             this.like = !like
                         }
-                        (activity as? MainActivity)?.txtCoin?.text = String.format(resources.getString(R.string.value_coin), getValueCoin())
+                        updateGold()
+                        (activity as? MainActivity)?.getData()
                         viewModel.upDateSong(pos, songDto)
                         audioAdapter?.notifyItemChanged(pos)
                         Toast.makeText(
@@ -127,6 +129,10 @@ class ChartsFragment : Fragment(), AudioAdapter.OnItemSelect {
         }
             dialog.create()
         dialog.show()
+    }
+    private fun updateGold() {
+        val dataController = DataController(MainApp.newInstance()?.deviceId ?: "")
+        dataController.updateDocument(MainApp.newInstance()?.preference?.getValueCoin() ?: 0)
     }
 
     private fun openPlayController(songDto: Song) {
